@@ -1,0 +1,870 @@
+#include<stdlib.h>
+#include<string.h>
+#include<math.h>     // For fabs() and fabsf()
+#include<float.h>    // For FLT_EPSILON and DBL_EPSILON#include"pvars.h"
+
+#include"pvars.h"
+#include"perrno.h"
+#include"plist_internal.h"
+
+/**
+ * @brief Creates and initializes a new plist_t structure.
+ *
+ * Allocates memory for the list structure and its initial elements array.
+ * The elements array is initialized using calloc, ensuring all pvar_t
+ * structs have their type set to PVAR_TYPE_NONE (0) and their data union
+ * fields (including the string pointer) are NULL.
+ *
+ * @param initial_capacity The starting capacity for the list. Must be >= 1.
+ * @return A pointer to the newly created plist_t structure, or NULL on failure.
+ */
+plist_t *plist_create(long int initial_capacity)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (initial_capacity < 1) {
+		pvars_errno = FAILURE_PLIST_CREATE_CAPACITY_OUT_OF_BOUNDS;
+		return NULL;
+	}
+
+	plist_t *new_list = malloc(sizeof(plist_t));
+	if (new_list == NULL) {
+		pvars_errno = FAILURE_PLIST_CREATE_NEW_LIST_MALLOC_FAILED;
+		return NULL;
+	}
+
+	// Use calloc for pvar_t structs: initializes type to PVAR_TYPE_NONE (0) and data union to zero (NULL pointer)
+	new_list->elements = calloc((size_t)initial_capacity, sizeof(pvar_t));
+	if (new_list->elements == NULL) {
+		free(new_list);
+		pvars_errno = FAILURE_PLIST_CREATE_NEW_LIST_DATA_MALLOC_FAILED;
+		return NULL;
+	}
+	
+	new_list->capacity = (size_t)initial_capacity;
+	new_list->count = 0;
+
+	return new_list;
+}
+
+/**
+ * @brief Helper function to safely free dynamic data within a pvar_t element.
+ *
+ * This function only frees memory if the element type is a string, as other types
+ * (int, double) are stored directly in the union and require no heap deallocation.
+ * It also resets the element to a safe, uninitialized state.
+ *
+ * @param element A pointer to the pvar_t element.
+ */
+static void pvar_free_data(pvar_t *element) {
+	if (element->type == PVAR_TYPE_STRING && element->data.s != NULL) {
+		free(element->data.s);
+	}
+	// Reset element to a known safe state (PVAR_TYPE_NONE, data.s=NULL)
+	memset(element, 0, sizeof(pvar_t));
+}
+
+/**
+ * @brief Ensures there is capacity for one more element, resizing if necessary.
+ * * @param list The list to check.
+ * @return True if capacity is available/resized successfully, false otherwise.
+ */
+static bool plist_ensure_capacity(plist_t *list)
+{
+	if (list->count < list->capacity) {
+		pvars_errno = SUCCESS;
+		return true;
+	}
+
+	size_t old_capacity = list->capacity;
+	size_t new_capacity = list->capacity * 2;
+	
+	// Reallocate pvar_t array
+	pvar_t *new_elements = (pvar_t *)realloc(list->elements, new_capacity * sizeof(pvar_t));
+
+	if (new_elements == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_REALLOC_FAILED; 
+		return false;
+	}
+	
+	list->elements = new_elements;
+
+	// Initialize new memory slots to PVAR_TYPE_NONE (zeroing the entire struct is safe)
+	// We use list->elements + old_capacity to get the start of the new block
+	memset(list->elements + old_capacity, 0, (new_capacity - old_capacity) * sizeof(pvar_t));
+
+	list->capacity = new_capacity;
+	pvars_errno = SUCCESS;
+	return true;
+}
+
+
+/**
+ * @brief Adds a single string to the list.
+ *
+ * The string is duplicated using strdup and stored in a new pvar_t element.
+ *
+ * @param list The list to add to.
+ * @param value The string to add (will be duplicated).
+ */
+void plist_add_str(plist_t *list, const char *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_NULL_INPUT_LIST;
+		return;
+	}
+
+	if (value == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_NULL_STRING_INPUT;
+		return;
+	}
+
+	/* Resize capacity if needed */
+	if (!plist_ensure_capacity(list)) {
+		// plist_ensure_capacity sets the error code
+		return;
+	}
+
+	// Store the string
+	char *new_str = strdup(value);
+
+	if (new_str == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_STRDUP_FAILED;
+		return;
+	}
+
+	// Populate the pvar_t struct fields
+	list->elements[list->count].data.s = new_str;
+	list->elements[list->count].type = PVAR_TYPE_STRING;
+
+	list->count++;
+}
+
+/**
+ * @brief Adds a single integer value to the list.
+ *
+ * @param list The list to add to.
+ * @param value The integer value to store.
+ */
+void plist_add_int(plist_t *list, int value)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_INT_NULL_INPUT;
+		return;
+	}
+
+	/* Resize capacity if needed */
+	if (!plist_ensure_capacity(list)) {
+		// plist_ensure_capacity sets the error code (FAILURE_PLIST_ADD_REALLOC_FAILED)
+		return;
+	}
+	
+	// Data stored directly in the union (no heap allocation needed)
+	list->elements[list->count].data.i = value;
+	list->elements[list->count].type = PVAR_TYPE_INT;
+
+	list->count++;
+}
+
+/**
+ * @brief Adds a single double value to the list.
+ *
+ * @param list The list to add to.
+ * @param value The double value to store.
+ */
+void plist_add_double(plist_t *list, double value)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_DOUBLE_NULL_INPUT;
+		return;
+	}
+
+	/* Resize capacity if needed */
+	if (!plist_ensure_capacity(list)) {
+		// plist_ensure_capacity sets the error code (FAILURE_PLIST_ADD_REALLOC_FAILED)
+		return;
+	}
+	
+	// Data stored directly in the union (no heap allocation needed)
+	list->elements[list->count].data.d = value;
+	list->elements[list->count].type = PVAR_TYPE_DOUBLE;
+
+	list->count++;
+}
+
+/**
+ * @brief Adds a single long value to the list.
+ *
+ * @param list The list to add to.
+ * @param value The long value to store.
+ */
+void plist_add_long(plist_t *list, long value)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_LONG_NULL_INPUT;
+		return;
+	}
+
+	/* Resize capacity if needed */
+	if (!plist_ensure_capacity(list)) {
+		// plist_ensure_capacity sets the error code (FAILURE_PLIST_ADD_REALLOC_FAILED)
+		return;
+	}
+	
+	// Data stored directly in the union (no heap allocation needed)
+	list->elements[list->count].data.l = value;
+	list->elements[list->count].type = PVAR_TYPE_LONG;
+
+	list->count++;
+}
+
+/**
+ * @brief Adds a single float value to the list.
+ *
+ * @param list The list to add to.
+ * @param value The float value to store.
+ */
+void plist_add_float(plist_t *list, float value)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_FLOAT_NULL_INPUT;
+		return;
+	}
+
+	/* Resize capacity if needed */
+	if (!plist_ensure_capacity(list)) {
+		// plist_ensure_capacity sets the error code (FAILURE_PLIST_ADD_REALLOC_FAILED)
+		return;
+	}
+	
+	// Data stored directly in the union (no heap allocation needed)
+	list->elements[list->count].data.f = value;
+	list->elements[list->count].type = PVAR_TYPE_FLOAT;
+
+	list->count++;
+}
+
+
+/**
+ * @brief Clears the list, freeing memory for all contained elements (like strings).
+ *
+ * Resets the element count to zero but preserves the allocated capacity.
+ *
+ * @param list The list to empty.
+ */
+void plist_empty(plist_t *list)
+{
+	if (list == NULL || list->elements == NULL) {
+		return;
+	}
+
+	// Free data for each element (only frees string memory if type is STRING)
+	for (size_t i = 0; i < list->count; i++) {
+		pvar_free_data(&list->elements[i]);
+	}
+
+	/* Reset count to 0 */
+	list->count = 0;
+}
+
+/**
+ * @brief Destroys the list, freeing all associated memory.
+ *
+ * Calls plist_empty() to free element data, then frees the elements array,
+ * and finally frees the list structure itself.
+ *
+ * @param list The list to destroy.
+ */
+void plist_destroy(plist_t *list)
+{
+	if (list == NULL) {
+		pvars_errno = SUCCESS; 
+		return;
+	}
+
+	/* Free all contents of the list */
+	plist_empty(list);
+
+	/* Free the data pointer array */
+	if (list->elements != NULL) {
+		free(list->elements);
+	}
+	/* Free the list structure itself */
+	free(list);
+	pvars_errno = SUCCESS;
+}
+
+/**
+ * @brief Prints the contents of the list to standard output.
+ *
+ * @param list The list to print.
+ */
+void plist_print(plist_t *list)
+{
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_PRINT_NULL_INPUT_LIST;
+		return;
+	}
+	if (list->elements == NULL) {
+		pvars_errno = FAILURE_PLIST_PRINT_NULL_INPUT_LIST_DATA;
+		return;
+	}
+
+	pvars_errno = PERRNO_CLEAR; // Clear error before proceeding
+
+	putchar('[');
+
+	for (size_t i = 0; i < list->count; i++) {
+		if (i > 0) {
+			printf(", ");
+		}
+		
+		pvar_t current = list->elements[i];
+
+		switch (current.type) {
+			case PVAR_TYPE_STRING:
+				printf("\'%s\'", current.data.s);
+				break;
+			case PVAR_TYPE_INT:
+				printf("%d", current.data.i);
+				break;
+			case PVAR_TYPE_DOUBLE:
+				printf("%lf", current.data.d);
+				break;
+			case PVAR_TYPE_LONG:
+				printf("%ld", current.data.l);
+				break;
+			case PVAR_TYPE_FLOAT:
+				printf("%f", current.data.f);
+				break;
+			default:
+				printf("[Type: Unknown]");
+				break;
+		}
+	}
+	putchar(']');
+	putchar('\n');
+}
+
+/**
+ * @brief Returns the current number of elements in the list.
+ *
+ * @param list The list to query.
+ * @return The number of elements (list->count) if the list is valid, 
+ * or 0 if the list is NULL.
+ */
+size_t plist_get_size(plist_t *list)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (list == NULL) {
+		return 0;
+	}
+	
+	return list->count;
+}
+
+/**
+ * @brief Returns the current capacity of the list.
+ *
+ * @param list The list to query.
+ * @return The capacity (list->capacity) if the list is valid, 
+ * or 0 if the list is NULL.
+ */
+size_t plist_get_capacity(plist_t *list)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (list == NULL) {
+		return 0;
+	}
+	
+	return list->capacity;
+}
+
+/**
+ * @brief Retrieves the string value at a given index.
+ *
+ * Performs boundary checks and, critically, checks if the element's type is
+ * PVAR_TYPE_STRING.
+ *
+ * @param list The list to read from.
+ * @param index The index of the element to retrieve.
+ * @return The string pointer, or NULL if the index is out of bounds or the type is incorrect.
+ */
+bool plist_get_str(plist_t *list, size_t index, char **out_value)
+{
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_STR_NULL_INPUT;
+		return false;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_GET_STR_OUT_OF_BOUNDS;
+		return false;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Check type before accessing data.s
+	if (element->type != PVAR_TYPE_STRING) {
+		pvars_errno = FAILURE_PLIST_GET_STR_WRONG_TYPE;
+		return false;
+	}
+	
+	*out_value = element->data.s;
+	
+	pvars_errno = SUCCESS;
+	return true;
+}
+
+/**
+ * @brief Retrieves the integer value at a given index.
+ *
+ * Performs boundary checks and checks if the element's type is PVAR_TYPE_INT.
+ * The retrieved value is written to the pointer `out_value`.
+ *
+ * @param list The list to read from.
+ * @param index The index of the element to retrieve.
+ * @param out_value Pointer where the retrieved integer value should be stored.
+ * @return True on success, False on failure (with pvars_errno set).
+ */
+bool plist_get_int(plist_t *list, size_t index, int *out_value)
+{
+	if (list == NULL || out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_INT_NULL_INPUT;
+		return false;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_GET_INT_OUT_OF_BOUNDS;
+		return false;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Check type before accessing data.i
+	if (element->type != PVAR_TYPE_INT) {
+		pvars_errno = FAILURE_PLIST_GET_INT_WRONG_TYPE;
+		return false;
+	}
+	
+	*out_value = element->data.i;
+
+	pvars_errno = SUCCESS;
+	return true;
+}
+
+/**
+ * @brief Retrieves the double value at a given index.
+ *
+ * Performs boundary checks and checks if the element's type is PVAR_TYPE_DOUBLE.
+ * The retrieved value is written to the pointer `out_value`.
+ *
+ * @param list The list to read from.
+ * @param index The index of the element to retrieve.
+ * @param out_value Pointer where the retrieved double value should be stored.
+ * @return True on success, False on failure (with pvars_errno set).
+ */
+bool plist_get_double(plist_t *list, size_t index, double *out_value)
+{
+	if (list == NULL || out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_DOUBLE_NULL_INPUT;
+		return false;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_GET_DOUBLE_OUT_OF_BOUNDS;
+		return false;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Check type before accessing data.d
+	if (element->type != PVAR_TYPE_DOUBLE) {
+		pvars_errno = FAILURE_PLIST_GET_DOUBLE_WRONG_TYPE;
+		return false;
+	}
+	
+	*out_value = element->data.d;
+
+	pvars_errno = SUCCESS;
+	return true;
+}
+
+/**
+ * @brief Retrieves the long value at a given index.
+ *
+ * Performs boundary checks and checks if the element's type is PVAR_TYPE_LONG.
+ * The retrieved value is written to the pointer `out_value`.
+ *
+ * @param list The list to read from.
+ * @param index The index of the element to retrieve.
+ * @param out_value Pointer where the retrieved long value should be stored.
+ * @return True on success, False on failure (with pvars_errno set).
+ */
+bool plist_get_long(plist_t *list, size_t index, long *out_value)
+{
+	if (list == NULL || out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_LONG_NULL_INPUT;
+		return false;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_GET_LONG_OUT_OF_BOUNDS;
+		return false;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Check type before accessing data.i
+	if (element->type != PVAR_TYPE_LONG) {
+		pvars_errno = FAILURE_PLIST_GET_LONG_WRONG_TYPE;
+		return false;
+	}
+	
+	*out_value = element->data.l;
+
+	pvars_errno = SUCCESS;
+	return true;
+}
+
+/**
+ * @brief Retrieves the float value at a given index.
+ *
+ * Performs boundary checks and checks if the element's type is PVAR_TYPE_FLOAT.
+ * The retrieved value is written to the pointer `out_value`.
+ *
+ * @param list The list to read from.
+ * @param index The index of the element to retrieve.
+ * @param out_value Pointer where the retrieved float value should be stored.
+ * @return True on success, False on failure (with pvars_errno set).
+ */
+bool plist_get_float(plist_t *list, size_t index, float *out_value)
+{
+	if (list == NULL || out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_FLOAT_NULL_INPUT;
+		return false;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_GET_FLOAT_OUT_OF_BOUNDS;
+		return false;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Check type before accessing data.d
+	if (element->type != PVAR_TYPE_FLOAT) {
+		pvars_errno = FAILURE_PLIST_GET_FLOAT_WRONG_TYPE;
+		return false;
+	}
+	
+	*out_value = element->data.f;
+
+	pvars_errno = SUCCESS;
+	return true;
+}
+
+
+
+/**
+ * @brief Sets the string value at a given index.
+ *
+ * The existing content of the element is freed first (if it was a string).
+ * A copy of the new string is stored, and the element's type is set to STRING.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to set.
+ * @param new_string The new string to store (will be duplicated).
+ */
+void plist_set_str(plist_t *list, size_t index, char *new_string)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_STR_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_SET_STR_OUT_OF_BOUNDS;
+		return;
+	}
+
+	if (new_string == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_STR_NULL_STRING_INPUT;
+		return;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Free the data of the existing element, regardless of its previous type
+	pvar_free_data(element);
+
+	char *current_str = strdup(new_string);
+	if (current_str == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_STR_STRDUP_FAILED;
+		return;
+	}
+
+	element->data.s = current_str;
+	element->type = PVAR_TYPE_STRING; // Ensures the type is set correctly
+}
+
+/**
+ * @brief Sets the integer value at a given index.
+ *
+ * The existing content of the element is freed first (if it was a string).
+ * The new integer value is stored, and the element's type is set to INT.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to set.
+ * @param new_value The new integer value to store.
+ */
+void plist_set_int(plist_t *list, size_t index, int new_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_INT_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_SET_INT_OUT_OF_BOUNDS;
+		return;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Free the data of the existing element, regardless of its previous type
+	pvar_free_data(element);
+
+	element->data.i = new_value;
+	element->type = PVAR_TYPE_INT; // Ensures the type is set correctly
+}
+
+/**
+ * @brief Sets the double value at a given index.
+ *
+ * The existing content of the element is freed first (if it was a string).
+ * The new integer value is stored, and the element's type is set to DOUBLE.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to set.
+ * @param new_value The new double value to store.
+ */
+void plist_set_double(plist_t *list, size_t index, double new_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_DOUBLE_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_SET_DOUBLE_OUT_OF_BOUNDS;
+		return;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Free the data of the existing element, regardless of its previous type
+	pvar_free_data(element);
+
+	element->data.d = new_value;
+	element->type = PVAR_TYPE_DOUBLE; // Ensures the type is set correctly
+}
+
+/**
+ * @brief Sets the long value at a given index.
+ *
+ * The existing content of the element is freed first (if it was a string).
+ * The new long value is stored, and the element's type is set to LONG.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to set.
+ * @param new_value The new long value to store.
+ */
+void plist_set_long(plist_t *list, size_t index, long new_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_LONG_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_SET_LONG_OUT_OF_BOUNDS;
+		return;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Free the data of the existing element, regardless of its previous type
+	pvar_free_data(element);
+
+	element->data.l = new_value;
+	element->type = PVAR_TYPE_LONG; // Ensures the type is set correctly
+}
+
+/**
+ * @brief Sets the float value at a given index.
+ *
+ * The existing content of the element is freed first (if it was a string).
+ * The new float value is stored, and the element's type is set to float.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to set.
+ * @param new_value The new float value to store.
+ */
+void plist_set_float(plist_t *list, size_t index, float new_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_FLOAT_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_SET_FLOAT_OUT_OF_BOUNDS;
+		return;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Free the data of the existing element, regardless of its previous type
+	pvar_free_data(element);
+
+	element->data.f = new_value;
+	element->type = PVAR_TYPE_FLOAT; // Ensures the type is set correctly
+}
+
+
+
+/**
+ * @brief Removes the element at a given index, shifting subsequent elements.
+ *
+ * Frees the data of the removed element, shifts the remaining elements down,
+ * and decrements the count.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to remove.
+ */
+void plist_remove(plist_t *list, size_t index)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_REMOVE_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_REMOVE_OUT_OF_BOUNDS;
+		return;
+	}
+
+	// 1. Free the memory of the element being removed
+	pvar_free_data(&list->elements[index]);
+
+	// 2. Shift all subsequent elements down
+	for (size_t i = index; i < list->count - 1; i++) {
+		// Copy the pvar_t struct, including type and union data
+		list->elements[i] = list->elements[i+1];
+	}
+	
+	// 3. Zero out the last element that was just duplicated/moved
+	memset(&list->elements[list->count - 1], 0, sizeof(pvar_t));
+
+	list->count--;
+	pvars_errno = SUCCESS;
+}
+
+/**
+ * @brief Checks for item in list.
+ *
+ * @param list of elements
+ * @param element to find in list
+ */
+bool plist_contains(plist_t *list, pvar_t *element_to_find)
+{
+	if (list == NULL || element_to_find == NULL) {
+		pvars_errno = FAILURE_PLIST_CONTAINS_NULL_INPUT;
+		return false;
+	}
+
+	for (size_t i = 0; i < list->count; i++) {
+		/* Return true if pvar_equals returns true */
+		if (pvar_equals(&list->elements[i], element_to_find)) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+/**
+ * @brief Compares two variables.
+ *
+ * @param element a to be compared
+ * @param element b to be compared
+ */
+bool pvar_equals(pvar_t *a, pvar_t *b)
+{
+	/* This check should really be redundant as the caller function must check for NULL input first */
+	if (a == NULL || b == NULL) {
+		pvars_errno = FAILURE_PVAR_EQUALS_NULL_INPUT;
+		return false;
+	}
+	
+	/* The following doesn't trigger an error number because the brief is technically fulfilled. Error is set to SUCCESS */
+	if (a->type != b->type) {
+		pvars_errno = SUCCESS;
+		return false;
+	}
+	
+	switch (a->type) {
+		case PVAR_TYPE_STRING:
+			int strcmp_result = strcmp(a->data.s, b->data.s);
+			if (strcmp_result != 0) {
+				return false;
+			}
+			return true;
+		case PVAR_TYPE_INT:
+			return (a->data.i == b->data.i); // Conditional statement evaluates to either true or false
+		case PVAR_TYPE_LONG:
+			return (a->data.l == b->data.l); // Conditional statement evaluates to either true or false
+		case PVAR_TYPE_DOUBLE:
+			if (fabs(a->data.d - b->data.d) > DBL_EPSILON) {
+				return false;
+			}
+			return true;
+		case PVAR_TYPE_FLOAT:
+			// Floats: Check if the absolute difference is within a small epsilon (FLT_EPSILON)
+			// fabsf() is the float version of fabs()
+			if (fabsf(a->data.f - b->data.f) > FLT_EPSILON) {
+				return false;
+			}
+			return true;
+		case PVAR_TYPE_NONE:
+			return true;
+		default:
+			pvars_errno = FAILURE_PVAR_EQUALS_UNKNOWN_VAR_TYPE;
+			return false;
+	}
+}

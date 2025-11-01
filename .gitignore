@@ -1,0 +1,14 @@
+# Ignore C build artifacts
+*.o
+*.a
+*.so
+*.gch
+
+#ignore compiled executables
+/test/test_pvars
+/lib/
+a.out
+
+# Ignore temporary files
+*~
+*.swp
