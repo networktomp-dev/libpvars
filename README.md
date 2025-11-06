@@ -6,11 +6,10 @@ Example use:
 #include <stdlib.h>
 #include <stdbool.h>
 #include "pvars.h" // Library header
-#include "perrno.h" // Error code header
 
 int main()
 {
-    // 1. Create the dynamic list (starting with capacity 3)
+    // Create a dynamic list (starting with capacity 3)
 
   plist_t *my_list = plist_create(3);
 
@@ -19,20 +18,14 @@ int main()
     return 1;
   }
 
-  // 2. Add different data types (Python-style list appending)
+  // Add different data types (Python-style list appending)
   plist_add_str(my_list, "Hello, C!");
   plist_add_int(my_list, 42);
   plist_add_double(my_list, 3.14159);
   plist_add_long(my_list, 9876543210L);
-
-  // Check list size
+  
   printf("List size after adding elements: %zu\n", plist_get_size(my_list));
 
-  // Optional: Print the entire list with plist_print
-  // printf("List contents:\n");
-  // plist_print(my_list);
-
-  // 3. Retrieve values safely
   printf("\n--- Retrieving Values ---\n");
   char *retrieved_str = NULL;
   int retrieved_int = 0;
@@ -57,7 +50,6 @@ int main()
   printf("Index 0 (Double): FAILED (Correctly detected wrong type: %s)\n", perror_message());
   }
 
-  // 4. Cleanup and Free Memory
   plist_destroy(my_list);
   printf("\nList destroyed successfully. Program finished.\n");
 
