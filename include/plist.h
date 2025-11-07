@@ -7,6 +7,7 @@
 #include<stdbool.h> /* Essential for bool and true/false */
 #include<stddef.h>  /* Essential for size_t */
 
+#include"pvars.h"
 #include"perrno.h"
 
 typedef struct plist_t plist_t;
