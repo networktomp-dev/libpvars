@@ -18,7 +18,7 @@ const char *perror_message(void)
 		case FAILURE_PLIST_CREATE_CAPACITY_OUT_OF_BOUNDS:
 			return "FAILURE: Function plist_create() cannot have a capacity less than 1";
 		case FAILURE_PLIST_CREATE_NEW_LIST_MALLOC_FAILED:
-			return "FAILURE: malloc() failed to allocate memory to plist_t *new list in function plist_create()";
+			return "FAILURE: malloc() failed to allocate memory to plist_t *new_list in function plist_create()";
 		case FAILURE_PLIST_CREATE_NEW_LIST_DATA_MALLOC_FAILED:
 			return "FAILURE: Unable to allocate memory to new_list->elements in function plist_create()";
 		
@@ -103,27 +103,125 @@ const char *perror_message(void)
 			return "FAILURE: NULL list passed to function plist_set_float()";
 		case FAILURE_PLIST_SET_FLOAT_OUT_OF_BOUNDS:
 			return "FAILURE: Passed index is out of bounds in function plist_set_float()";
+			
+		/* plist_add_list / plist_get_list / plist_set_list Failures */
+		case FAILURE_PLIST_ADD_LIST_NULL_INPUT:
+			return "FAILURE: NULL carrier list passed to function plist_add_list()";
+		case FAILURE_PLIST_ADD_LIST_NULL_LIST_INPUT:
+			return "FAILURE: NULL list passed to function plist_add_list()";
+		case FAILURE_PLIST_ADD_LIST_PLIST_COPY_FAILED:
+			return "FAILURE: plist_copy() failed in function plist_add_list()";
+		case FAILURE_PLIST_GET_LIST_NULL_INPUT:
+			return "FAILURE: NULL input passed to function plist_get_list()";
+		case FAILURE_PLIST_GET_LIST_OUT_OF_BOUNDS:
+			return "FAILURE: Passed index is out of bounds in function plist_get_list()";
+		case FAILURE_PLIST_GET_LIST_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected plist_t) in function plist_get_list()";
+		case FAILURE_PLIST_SET_LIST_NULL_INPUT:
+			return "FAILURE: NULL input passed to function plist_set_list()";
+		case FAILURE_PLIST_SET_LIST_OUT_OF_BOUNDS:
+			return "FAILURE: Passed index is out of bounds in function plist_set_list()";
+		case FAILURE_PLIST_SET_LIST_NULL_LIST_INPUT:
+			return "FAILURE: NULL list input passed to function plist_set_list()";
+		case FAILURE_PLIST_SET_LIST_PLIST_COPY_FAILED:
+			return "FAILURE: plist_copy() failed in function plist_set_list()";
 
 		/* plist_contains Failures */
 		case FAILURE_PLIST_CONTAINS_NULL_INPUT:
 			return "FAILURE: NULL input passed to function plist_contains()";
 			
-		/* pvar_equals Failures */
+		/* pvar_equals / pvar_copy Failures */
 		case FAILURE_PVAR_EQUALS_NULL_INPUT:
-			return "FAILURE: NULL variable passed to function pvar_equals()";
+			return "FAILURE: NULL input passed to function pvar_equals()";
 		case FAILURE_PVAR_EQUALS_UNKNOWN_VAR_TYPE:
 			return "FAILURE: Cannot compare variable: Variable type unknown! in function pvar_equals()";
+		case FAILURE_PVAR_COPY_NULL_INPUT:
+			return "FAILURE: NULL input passed to function pvar_copy()";
+		case FAILURE_PVAR_COPY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed in function pvar_copy()";
+		case FAILURE_PVAR_COPY_PLIST_COPY_FAILED:
+			return "FAILURE: plist_copy() failed in function pvar_copy()";
+		
+		/* plist_copy Failures */
+		case FAILURE_PLIST_COPY_NULL_INPUT:
+			return "FAILURE: NULL input passed to function plist_copy()";
+		case FAILURE_PLIST_COPY_PLIST_CREATE_FAILED:
+			return "FAILURE: plist_create() failed in function plist_copy()";
+		case FAILURE_PLIST_COPY_PVAR_COPY_FAILED:
+			return "FAILURE: pvar_copy() failed in function plist_copy()";
 			
 		/* General Failures */
 		case FAILURE_PLIST_PRINT_NULL_INPUT_LIST:
 			return "FAILURE: NULL list passed to function plist_print()";
-		case FAILURE_PLIST_PRINT_NULL_INPUT_LIST_DATA:
-			return "FAILURE: list->elements is NULL in function plist_print()";
+		case FAILURE_PLIST_PRINT_INTERNAL_NULL_INPUT_LIST_DATA:
+			return "FAILURE: list->elements is NULL in function plist_print_internal()";
 		case FAILURE_PLIST_REMOVE_NULL_INPUT:
 			return "FAILURE: NULL input passed to function plist_remove()";
 		case FAILURE_PLIST_REMOVE_OUT_OF_BOUNDS:
 			return "FAILURE: Passed index is out of bounds in function plist_remove()";
 			
+		/* pdict_create Failures */
+		case FAILURE_PDICT_CREATE_CAPACITY_OUT_OF_BOUNDS:
+			return "FAILURE: Function pdict_create() cannot have a capacity less than 1";
+		case FAILURE_PDICT_CREATE_NEW_DICT_MALLOC_FAILED:
+			return "FAILURE: malloc() failed to allocate memory to pdict_t *new_dict in function pdict_create()";
+		case FAILURE_PDICT_CREATE_NEW_DICT_BUCKETS_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to new_dict->buckets in function pdict_create()";
+			
+		/* pdict_add_str Failures */
+		case FAILURE_PDICT_ADD_STR_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_add_str()";
+		case FAILURE_PDICT_ADD_STR_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_add_str()";
+		case FAILURE_PDICT_ADD_STR_NULL_INPUT_VALUE:
+			return "FAILURE: NULL value input passed to function pdict_add_str()";
+		case FAILURE_PDICT_ADD_STR_VALUE_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to new_string in function pdict_add_str()";
+		case FAILURE_PDICT_ADD_STR_ENTRY_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_str()";
+		case FAILURE_PDICT_ADD_STR_KEY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_str()";
+		
+		/* pdict_add_int Failures */
+		case FAILURE_PDICT_ADD_INT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_add_int()";
+		case FAILURE_PDICT_ADD_INT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_add_int()";
+		case FAILURE_PDICT_ADD_INT_ENTRY_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_int()";
+		case FAILURE_PDICT_ADD_INT_KEY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_int()";
+		
+		/* pdict_add_double Failures */
+		case FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_add_double()";
+		case FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_add_double()";
+		case FAILURE_PDICT_ADD_DOUBLE_ENTRY_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_double()";
+		case FAILURE_PDICT_ADD_DOUBLE_KEY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_double()";
+		
+		/* pdict_add_long Failures */
+		case FAILURE_PDICT_ADD_LONG_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_add_long()";
+		case FAILURE_PDICT_ADD_LONG_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_add_long()";
+		case FAILURE_PDICT_ADD_LONG_ENTRY_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_long()";
+		case FAILURE_PDICT_ADD_LONG_KEY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_long()";
+		
+		/* pdict_add_float Failures */
+		case FAILURE_PDICT_ADD_FLOAT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_add_float()";
+		case FAILURE_PDICT_ADD_FLOAT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_add_float()";
+		case FAILURE_PDICT_ADD_FLOAT_ENTRY_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_float()";
+		case FAILURE_PDICT_ADD_FLOAT_KEY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_float()";
+
 		default:
 			return "Unknown error number";
 	}

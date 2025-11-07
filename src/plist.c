@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include<stdlib.h>
 #include<string.h>
 #include<math.h>     // For fabs() and fabsf()
@@ -254,6 +256,47 @@ void plist_add_float(plist_t *list, float value)
 	list->count++;
 }
 
+/**
+ * @brief Adds a single list to the list.
+ *
+ * The list is stored in a new pvar_t element.
+ *
+ * @param list The list to add to.
+ * @param value The list to add.
+ */
+void plist_add_list(plist_t *list, plist_t *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_LIST_NULL_INPUT;
+		return;
+	}
+
+	if (value == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_LIST_NULL_LIST_INPUT;
+		return;
+	}
+
+	/* Resize capacity if needed */
+	if (!plist_ensure_capacity(list)) {
+		// plist_ensure_capacity sets the error code
+		return;
+	}
+
+	plist_t *new_list = plist_copy(value);
+	if (new_list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_LIST_PLIST_COPY_FAILED;
+		return;
+	}
+	
+	// Populate the pvar_t struct fields
+	list->elements[list->count].data.ls = new_list;
+	list->elements[list->count].type = PVAR_TYPE_LIST;
+
+	list->count++;
+}
+
 
 /**
  * @brief Clears the list, freeing memory for all contained elements (like strings).
@@ -270,7 +313,12 @@ void plist_empty(plist_t *list)
 
 	// Free data for each element (only frees string memory if type is STRING)
 	for (size_t i = 0; i < list->count; i++) {
+		if (list->elements[i].type == PVAR_TYPE_LIST) {
+			/* Recursively empty internal list */
+			plist_destroy(list->elements[i].data.ls);
+		}
 		pvar_free_data(&list->elements[i]);
+		
 	}
 
 	/* Reset count to 0 */
@@ -305,7 +353,7 @@ void plist_destroy(plist_t *list)
 }
 
 /**
- * @brief Prints the contents of the list to standard output.
+ * @brief A wrapper function for plist_print_internal to ensure proper formatting
  *
  * @param list The list to print.
  */
@@ -315,8 +363,21 @@ void plist_print(plist_t *list)
 		pvars_errno = FAILURE_PLIST_PRINT_NULL_INPUT_LIST;
 		return;
 	}
+	
+	plist_print_internal(list);
+	putchar('\n');
+}
+
+/**
+ * @brief Prints the contents of the list to standard output.
+ *
+ * @param list The list to print.
+ */
+void plist_print_internal(plist_t *list)
+{
+
 	if (list->elements == NULL) {
-		pvars_errno = FAILURE_PLIST_PRINT_NULL_INPUT_LIST_DATA;
+		pvars_errno = FAILURE_PLIST_PRINT_INTERNAL_NULL_INPUT_LIST_DATA;
 		return;
 	}
 
@@ -347,13 +408,20 @@ void plist_print(plist_t *list)
 			case PVAR_TYPE_FLOAT:
 				printf("%f", current.data.f);
 				break;
+			case PVAR_TYPE_LIST:
+				/* Recursively print the internal list */
+				plist_print_internal(current.data.ls);
+				break;
+			case PVAR_TYPE_NONE: // <-- ADD THIS CASE
+				// Do nothing, or print 'NULL' if you prefer an explicit placeholder
+				printf("NULL"); 
+				break;
 			default:
 				printf("[Type: Unknown]");
 				break;
 		}
 	}
 	putchar(']');
-	putchar('\n');
 }
 
 /**
@@ -576,6 +644,43 @@ bool plist_get_float(plist_t *list, size_t index, float *out_value)
 	return true;
 }
 
+/**
+ * @brief Retrieves the list value at a given index.
+ *
+ * Performs boundary checks and checks if the element's type is PVAR_TYPE_LIST.
+ * The retrieved value is written to the pointer `out_value`.
+ *
+ * @param list The list to read from.
+ * @param index The index of the element to retrieve.
+ * @param out_value Pointer where the retrieved list value should be stored.
+ * @return True on success, False on failure (with pvars_errno set).
+ */
+bool plist_get_list(plist_t *list, size_t index, plist_t **out_value)
+{
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_LIST_NULL_INPUT;
+		return false;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_GET_LIST_OUT_OF_BOUNDS;
+		return false;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	// Check type before accessing data.s
+	if (element->type != PVAR_TYPE_LIST) {
+		pvars_errno = FAILURE_PLIST_GET_LIST_WRONG_TYPE;
+		return false;
+	}
+	
+	*out_value = element->data.ls;
+	
+	pvars_errno = SUCCESS;
+	return true;
+}
+
 
 
 /**
@@ -610,6 +715,9 @@ void plist_set_str(plist_t *list, size_t index, char *new_string)
 	pvar_t *element = &list->elements[index];
 
 	// Free the data of the existing element, regardless of its previous type
+	if (element->type == PVAR_TYPE_LIST) {
+		plist_destroy(element->data.ls);
+	}
 	pvar_free_data(element);
 
 	char *current_str = strdup(new_string);
@@ -649,6 +757,9 @@ void plist_set_int(plist_t *list, size_t index, int new_value)
 	pvar_t *element = &list->elements[index];
 
 	// Free the data of the existing element, regardless of its previous type
+	if (element->type == PVAR_TYPE_LIST) {
+		plist_destroy(element->data.ls);
+	}
 	pvar_free_data(element);
 
 	element->data.i = new_value;
@@ -682,6 +793,9 @@ void plist_set_double(plist_t *list, size_t index, double new_value)
 	pvar_t *element = &list->elements[index];
 
 	// Free the data of the existing element, regardless of its previous type
+	if (element->type == PVAR_TYPE_LIST) {
+		plist_destroy(element->data.ls);
+	}
 	pvar_free_data(element);
 
 	element->data.d = new_value;
@@ -715,6 +829,9 @@ void plist_set_long(plist_t *list, size_t index, long new_value)
 	pvar_t *element = &list->elements[index];
 
 	// Free the data of the existing element, regardless of its previous type
+	if (element->type == PVAR_TYPE_LIST) {
+		plist_destroy(element->data.ls);
+	}
 	pvar_free_data(element);
 
 	element->data.l = new_value;
@@ -748,10 +865,61 @@ void plist_set_float(plist_t *list, size_t index, float new_value)
 	pvar_t *element = &list->elements[index];
 
 	// Free the data of the existing element, regardless of its previous type
+	if (element->type == PVAR_TYPE_LIST) {
+		plist_destroy(element->data.ls);
+	}
 	pvar_free_data(element);
 
 	element->data.f = new_value;
 	element->type = PVAR_TYPE_FLOAT; // Ensures the type is set correctly
+}
+
+/**
+ * @brief Sets the list value at a given index.
+ *
+ * The existing content of the element is freed first (if it was a string or list).
+ * A copy of the new list is stored, and the element's type is set to LIST.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to set.
+ * @param new_list The new list to store.
+ */
+void plist_set_list(plist_t *list, size_t index, plist_t *new_list)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_LIST_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_SET_LIST_OUT_OF_BOUNDS;
+		return;
+	}
+
+	if (new_list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_LIST_NULL_LIST_INPUT;
+		return;
+	}
+
+	plist_t *deep_list = plist_copy(new_list);
+	if (deep_list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_LIST_PLIST_COPY_FAILED;
+		return;
+	}
+		
+	pvar_t *element = &list->elements[index];
+
+	// Free the data of the existing element, regardless of its previous type
+	if (element->type == PVAR_TYPE_LIST) {
+		plist_destroy(element->data.ls);
+	}
+	pvar_free_data(element);
+
+	element->data.ls = deep_list;
+	element->type = PVAR_TYPE_LIST;
+	; // Ensures the type is set correctly
 }
 
 
@@ -780,6 +948,9 @@ void plist_remove(plist_t *list, size_t index)
 	}
 
 	// 1. Free the memory of the element being removed
+	if (list->elements[index].type == PVAR_TYPE_LIST) {
+		plist_destroy(list->elements[index].data.ls);
+	}
 	pvar_free_data(&list->elements[index]);
 
 	// 2. Shift all subsequent elements down
@@ -787,10 +958,11 @@ void plist_remove(plist_t *list, size_t index)
 		// Copy the pvar_t struct, including type and union data
 		list->elements[i] = list->elements[i+1];
 	}
-	
-	// 3. Zero out the last element that was just duplicated/moved
-	memset(&list->elements[list->count - 1], 0, sizeof(pvar_t));
 
+	// 3. Zero out the last element that was just duplicated/moved
+
+	memset(&list->elements[list->count - 1], 0, sizeof(pvar_t));
+	
 	list->count--;
 	pvars_errno = SUCCESS;
 }
@@ -867,4 +1039,85 @@ bool pvar_equals(pvar_t *a, pvar_t *b)
 			pvars_errno = FAILURE_PVAR_EQUALS_UNKNOWN_VAR_TYPE;
 			return false;
 	}
+}
+
+pvar_t pvar_copy(const pvar_t *src)
+{
+	/* pvars_errno must be clear on each call to determine if pvar_copy fails recursively. See plist_copy */
+	pvars_errno = PERRNO_CLEAR;
+	pvar_t new_pvar;
+	new_pvar.type = PVAR_TYPE_NONE;
+	if (src == NULL) {
+		pvars_errno = FAILURE_PVAR_COPY_NULL_INPUT;
+		return new_pvar;
+	}
+	
+	switch (src->type) {
+		case PVAR_TYPE_STRING:
+			char *new_string = strdup(src->data.s);
+			if (new_string == NULL) {
+				pvars_errno = FAILURE_PVAR_COPY_STRDUP_FAILED;
+				return new_pvar;
+			}
+			new_pvar.data.s = new_string;
+			break;
+		case PVAR_TYPE_LIST:
+			plist_t *new_list = plist_copy(src->data.ls);
+			if (new_list == NULL) {
+				pvars_errno = FAILURE_PVAR_COPY_PLIST_COPY_FAILED;
+				return new_pvar;
+			}
+			new_pvar.data.ls = new_list;
+			break;
+		//case PVAR_TYPE_DICT:
+		//	break;
+		//case PVAR_TYPE_TUPLE:
+		//	break;
+		case PVAR_TYPE_INT:
+		case PVAR_TYPE_DOUBLE:
+		case PVAR_TYPE_LONG:
+		case PVAR_TYPE_FLOAT:
+		case PVAR_TYPE_NONE:
+			new_pvar.data = src->data;
+			break;
+		default:
+			break;
+	}
+	new_pvar.type = src->type;
+	
+	pvars_errno = SUCCESS;
+	return new_pvar;
+}
+
+plist_t *plist_copy(const plist_t *src)
+{
+	/* pvars_errno must be clear on each call to determine if pvar_copy fails recursively. See pvar_copy */
+	pvars_errno = PERRNO_CLEAR;
+	if (src == NULL) {
+		pvars_errno = FAILURE_PLIST_COPY_NULL_INPUT;
+		return NULL;
+	}
+	
+	plist_t *new_list = plist_create(src->capacity);
+	
+	if (new_list == NULL) {
+		pvars_errno = FAILURE_PLIST_COPY_PLIST_CREATE_FAILED;
+		return NULL;
+	}
+	
+	new_list->count = src->count;
+	
+	for (size_t i = 0; i < src->count; i++) {
+		pvar_t new_var = pvar_copy(&src->elements[i]);
+		if (!(pvars_errno == SUCCESS)) {
+			pvars_errno = FAILURE_PLIST_COPY_PVAR_COPY_FAILED;
+			plist_destroy(new_list);
+			return NULL;
+		}
+		new_list->elements[i] = new_var;
+	}
+	
+	pvars_errno = SUCCESS;
+	return new_list;
+	
 }

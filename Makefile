@@ -1,72 +1,71 @@
-#------------------------------------------------------------------------------
-# PROJECT VARIABLES
-#------------------------------------------------------------------------------
+# --- Makefile for libpvars C Library ---
 
 # Compiler and Flags
-CC      = gcc
-# -Wall -Wextra: Enable extensive warnings (highly recommended)
-# -g: Include debugging information
-# -Iinclude: Tell the compiler to look for header files in the 'include' directory
-CFLAGS  = -Wall -Wextra -g -Iinclude
+CC = gcc
+# -Wall, -Wextra: Enable all common and extra warnings
+# -g: Include debugging information (GDB)
+# -Iinclude: Add the 'include' directory to the compiler's search path for headers
+# -std=c11: Compile using the C11 standard
+CFLAGS = -Wall -Wextra -g -Iinclude -std=c11
 
-# Archiver and Flags for creating the static library
-AR      = ar
-ARFLAGS = rcs  # r: insert/replace; c: create archive; s: create index
-
-# Directories
+# Directories and Files
 SRC_DIR = src
-INC_DIR = include
 TEST_DIR = test
-
-# Library definitions
 LIB_NAME = libpvars.a
-LIB_OBJS = $(SRC_DIR)/perrno.o $(SRC_DIR)/pvars.o
 
+# Source and Object files for the Library
+SRC_FILES = pdict.c plist.c perrno.c
+OBJ_FILES = $(SRC_FILES:.c=.o)
+OBJS = $(addprefix $(SRC_DIR)/,$(OBJ_FILES))
 
-#------------------------------------------------------------------------------
-# TARGETS
-#------------------------------------------------------------------------------
+# Test Executable and Source
+TEST_SRC = $(TEST_DIR)/pdict_test.c
+TEST_EXEC = $(TEST_DIR)/test_pdict
 
-# Default target: builds the library and the test executable
-all: $(LIB_NAME) $(TEST_DIR)/test_pvars
-	@echo "Build successful! Run with: ./test/test_pvars"
+# -----------------
+# PRIMARY TARGETS
+# -----------------
 
-# Target to create the static library (libpvars.a)
-$(LIB_NAME): $(LIB_OBJS)
+# Default target: Builds the library and the test executable
+all: $(LIB_NAME) $(TEST_EXEC)
+.PHONY: all
+
+# -----------------
+# LIBRARY BUILD
+# -----------------
+
+# Rule to archive object files into the static library
+$(LIB_NAME): $(OBJS)
 	@echo "Archiving library: $@"
-	$(AR) $(ARFLAGS) $@ $^
+	ar rcs $@ $^
 
-# Target to build the test executable
-#
-# CFLAGS is used for compiling test.c (-Iinclude)
-# LDLIBS specifies the linker flags:
-# -L.: Look for libraries in the current directory (where libpvars.a is)
-# -lpvars: Link against libpvars.a
-$(TEST_DIR)/test_pvars: $(TEST_DIR)/test.c $(LIB_NAME)
-	@echo "Compiling and linking test executable: $@"
-	$(CC) $(CFLAGS) $< -o $@ -L. -lpvars
-
-# Rule for compiling source files in the 'src' directory into object files
-# $@ is the target (e.g., src/perrno.o)
-# $< is the first prerequisite (e.g., src/perrno.c)
-# $(@:.o=.c) converts src/perrno.o to src/perrno.c
+# Rule to compile source files into object files
+# This is a pattern rule that applies to all files matching src/*.c
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo "Compiling $<"
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# -----------------
+# TEST BUILD
+# -----------------
 
-#------------------------------------------------------------------------------
-# UTILITIES
-#------------------------------------------------------------------------------
+# Rule to compile and link the test executable
+$(TEST_EXEC): $(TEST_SRC) $(LIB_NAME)
+	@echo "Compiling and linking test executable: $@"
+	$(CC) $(CFLAGS) $< -o $@ -L. -l$(patsubst lib%.a,%,$(LIB_NAME))
 
-.PHONY: clean
+# Target to run the tests (assumes successful build)
+test: $(TEST_EXEC)
+	@echo "Build successful! Running tests..."
+	@./$(TEST_EXEC)
+.PHONY: test
 
-# Cleans up generated files (object files, library, and test executable)
+# -----------------
+# CLEANUP
+# -----------------
+
+# Remove all generated files
 clean:
-	@echo "Cleaning up build artifacts..."
-	# Remove object files from src directory
-	rm -f $(LIB_OBJS)
-	# Remove the static library
-	rm -f $(LIB_NAME)
-	# Remove the test executable
-	rm -f $(TEST_DIR)/test_pvars
+	@echo "Cleaning project files..."
+	rm -f $(OBJS) $(LIB_NAME) $(TEST_EXEC)
+.PHONY: clean
