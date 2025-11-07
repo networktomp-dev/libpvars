@@ -1012,9 +1012,12 @@ bool pvar_equals(pvar_t *a, pvar_t *b)
 	
 	switch (a->type) {
 		case PVAR_TYPE_STRING:
-			int strcmp_result = strcmp(a->data.s, b->data.s);
-			if (strcmp_result != 0) {
-				return false;
+			/* Extra curly braces creates new scope for the int declaration. Compilers with stricter standars should be satisfied */
+			{
+				int strcmp_result = strcmp(a->data.s, b->data.s);
+				if (strcmp_result != 0) {
+					return false;
+				}
 			}
 			return true;
 		case PVAR_TYPE_INT:
@@ -1054,20 +1057,26 @@ pvar_t pvar_copy(const pvar_t *src)
 	
 	switch (src->type) {
 		case PVAR_TYPE_STRING:
-			char *new_string = strdup(src->data.s);
-			if (new_string == NULL) {
-				pvars_errno = FAILURE_PVAR_COPY_STRDUP_FAILED;
-				return new_pvar;
+			/* Extra curly braces creates new scope for the char * declaration. Compilers with stricter standars should be satisfied */
+			{
+				char *new_string = strdup(src->data.s);
+				if (new_string == NULL) {
+					pvars_errno = FAILURE_PVAR_COPY_STRDUP_FAILED;
+					return new_pvar;
+				}
+				new_pvar.data.s = new_string;
 			}
-			new_pvar.data.s = new_string;
 			break;
 		case PVAR_TYPE_LIST:
-			plist_t *new_list = plist_copy(src->data.ls);
-			if (new_list == NULL) {
-				pvars_errno = FAILURE_PVAR_COPY_PLIST_COPY_FAILED;
-				return new_pvar;
+			/* Extra curly braces creates new scope for the plist_t * declaration. Compilers with stricter standars should be satisfied */
+			{
+				plist_t *new_list = plist_copy(src->data.ls);
+				if (new_list == NULL) {
+					pvars_errno = FAILURE_PVAR_COPY_PLIST_COPY_FAILED;
+					return new_pvar;
+				}
+				new_pvar.data.ls = new_list;
 			}
-			new_pvar.data.ls = new_list;
 			break;
 		//case PVAR_TYPE_DICT:
 		//	break;
