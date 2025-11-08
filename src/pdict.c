@@ -200,6 +200,7 @@ void pdict_add_str(pdict_t *dict, char *key, const char *value)
 			char *new_string = strdup(value);
 			if (new_string == NULL) {
 				pvars_errno = FAILURE_PDICT_ADD_STR_VALUE_STRDUP_FAILED;
+				return;
 			}
 
 			current->value.type = PVAR_TYPE_STRING;
@@ -482,5 +483,85 @@ void pdict_add_float(pdict_t *dict, char *key, float value)
 	dict->count++;
     
 	// G. (Future) Check Load Factor and Resize
+	// You would place your load factor check and resize function call here.
+}
+
+/**
+ * @brief Adds a list to a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add to the dict
+ * @return void
+ */
+void pdict_add_list(pdict_t *dict, char *key, plist_t *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_ADD_LIST_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_ADD_LIST_NULL_INPUT_KEY;
+		return;
+	}
+	if (value == NULL) {
+		pvars_errno = FAILURE_PDICT_ADD_LIST_NULL_INPUT_VALUE;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+			plist_t *new_list = plist_copy(value);
+			if (new_list == NULL) {
+				pvars_errno = FAILURE_PDICT_ADD_LIST_VALUE_PLIST_COPY_FAILED;
+				return;
+			}
+
+			current->value.type = PVAR_TYPE_LIST;
+			current->value.data.ls = new_list;
+			return;
+		}
+		current = current->next;
+	}
+
+
+
+	pdict_entry_t *new_entry = calloc(1, sizeof(pdict_entry_t));
+	if (new_entry == NULL) {
+		pvars_errno = FAILURE_PDICT_ADD_LIST_ENTRY_MALLOC_FAILED;
+		return;
+	}
+
+	new_entry->key = strdup(key);
+	if (new_entry->key == NULL) {
+		free(new_entry);
+		pvars_errno = FAILURE_PDICT_ADD_LIST_KEY_STRDUP_FAILED;
+		return;
+	}
+
+	char *new_list = plist_copy(value);
+	if (new_list == NULL) {
+		free(new_entry->key);
+		free(new_entry);
+		pvars_errno = FAILURE_PDICT_ADD_LIST_VALUE_PLIST_COPY_FAILED;
+		return;
+	}
+
+	new_entry->value.type = PVAR_TYPE_LIST;
+	new_entry->value.data.ls = new_list;
+
+	new_entry->next = dict->buckets[bucket_index];
+	dict->buckets[bucket_index] = new_entry;
+
+	dict->count++;
+    
+	// (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
 }

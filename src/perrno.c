@@ -221,6 +221,20 @@ const char *perror_message(void)
 			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_float()";
 		case FAILURE_PDICT_ADD_FLOAT_KEY_STRDUP_FAILED:
 			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_float()";
+		
+		/* pdict_add_str Failures */
+		case FAILURE_PDICT_ADD_LIST_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_add_list()";
+		case FAILURE_PDICT_ADD_LIST_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_add_list()";
+		case FAILURE_PDICT_ADD_LIST_NULL_INPUT_VALUE:
+			return "FAILURE: NULL value input passed to function pdict_add_list()";
+		case FAILURE_PDICT_ADD_LIST_VALUE_PLIST_COPY_FAILED:
+			return "FAILURE: plist_copy() failed to allocate memory to new_list in function pdict_add_list()";
+		case FAILURE_PDICT_ADD_LIST_ENTRY_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_list()";
+		case FAILURE_PDICT_ADD_LIST_KEY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_list()";
 
 		default:
 			return "Unknown error number";

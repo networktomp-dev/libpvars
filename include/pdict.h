@@ -14,5 +14,6 @@ void pdict_add_int(pdict_t *dict, char *key, int value);
 void pdict_add_double(pdict_t *dict, char *key, double value);
 void pdict_add_long(pdict_t *dict, char *key, long value);
 void pdict_add_float(pdict_t *dict, char *key, float value);
+void pdict_add_list(pdict_t *dict, char *key, plist_t *value);
 
 #endif
