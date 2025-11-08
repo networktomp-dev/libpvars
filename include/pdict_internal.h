@@ -1,7 +1,7 @@
 #ifndef PDICT_INTERNAL_H
 #define PDICT_INTERNAL_H
 
-#include "pvars.h"
+#include"pvars.h"
 
 /**
  * @brief Represents a single key-value pair in the dictionary.

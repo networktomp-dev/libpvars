@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -g -fPIC -Iinclude -std=c11
 SRC_DIR = src
 LIB_NAME = libpvars.a
 
-SRC_FILES = pdict.c plist.c perrno.c
+SRC_FILES = pdict.c plist.c perrno.c pvars.c
 OBJ_FILES = $(SRC_FILES:.c=.o)
 OBJS = $(addprefix $(SRC_DIR)/,$(OBJ_FILES))
 

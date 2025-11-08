@@ -8,7 +8,7 @@ TEST_SRC = test.c
 TEST_EXEC = test_pvars
 
 LIB_NAME = $(LIB_DIR)/libpvars.a
-LIB_SRC_FILES = pdict.c plist.c perrno.c
+LIB_SRC_FILES = pdict.c plist.c perrno.c pvars.c
 LIB_OBJ_FILES = $(LIB_SRC_FILES:.c=.o)
 LIB_OBJS = $(addprefix $(SRC_DIR)/,$(LIB_OBJ_FILES))
 

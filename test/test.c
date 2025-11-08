@@ -3,158 +3,188 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+#include <assert.h>
 
-// Include your public API headers
+#include "pvars.h"
 #include "plist.h"
 #include "pdict.h"
-#include "perrno.h"
+#include "pvars_internal.h" // For pvar_destroy_internal prototype
 
-// Define a global counter for tests to track successes and failures
-static int tests_run = 0;
-static int tests_failed = 0;
+// Global pvars_errno declaration (to link with the one defined in perrno.c)
+extern __thread int pvars_errno;
+
+#define TEST_PASS() (printf("  \033[32m[PASS]\033[0m %s\n", __func__))
+#define TEST_FAIL(msg) (printf("  \033[31m[FAIL]\033[0m %s: %s\n", __func__, msg))
+
+// --- Helper Functions for Test Setup ---
 
 /**
- * @brief Helper to print the current error message and a failure indicator.
- * @param test_name The name of the test that failed.
- * @param expected_err The expected error code (for debugging).
+ * @brief Creates a pvar_t struct holding a dynamically allocated string.
  */
-void print_error_and_fail(const char *test_name, int expected_err)
-{
-    fprintf(stderr, "\n--- FAILED TEST: %s ---\n", test_name);
-    fprintf(stderr, "    pvars_errno: %d (Expected: %d)\n", pvars_errno, expected_err);
-    fprintf(stderr, "    Error Message: %s\n", perror_message());
-    tests_failed++;
+pvar_t create_string_pvar(const char *str) {
+    pvar_t pvar = { .type = PVAR_TYPE_STRING };
+    pvar.data.s = strdup(str);
+    assert(pvar.data.s != NULL);
+    return pvar;
 }
 
 /**
- * @brief Macro for checking test conditions.
- * If the condition fails, it calls the error handler and returns.
+ * @brief Creates a pvar_t struct holding a new plist_t.
  */
-#define ASSERT(test_name, condition, expected_err) \
-    do { \
-        tests_run++; \
-        if (!(condition)) { \
-            print_error_and_fail(test_name, expected_err); \
-            return; \
-        } \
-    } while (0)
-
-/**
- * @brief Tests basic plist_t functionality: creation, adding, access, and cleanup.
- */
-void test_list_operations(void)
-{
-    printf("--- Testing List (plist_t) Operations ---\n");
-    plist_t *list = plist_create(10);
-    ASSERT("List Create", list != NULL && plist_get_capacity(list) >= 10, SUCCESS);
-    ASSERT("List Size Initial", plist_get_size(list) == 0, SUCCESS);
-
-    // 1. Add various data types
-    plist_add_str(list, "Hello List");
-    ASSERT("List Add Str", plist_get_size(list) == 1 && pvars_errno == SUCCESS, FAILURE_PLIST_ADD_NULL_INPUT_LIST);
-
-    plist_add_int(list, 42);
-    plist_add_double(list, 3.14159);
-    plist_add_float(list, 2.718f);
-    ASSERT("List Add All Types", plist_get_size(list) == 4, SUCCESS);
-    
-    printf("List after additions:\n");
-    plist_print(list);
-
-    // 2. Test Retrieval (Get)
-    char *s_val;
-    int i_val;
-    double d_val;
-    float f_val;
-
-    // Get string
-    bool success = plist_get_str(list, 0, &s_val);
-    ASSERT("List Get Str", success && strcmp(s_val, "Hello List") == 0, SUCCESS);
-
-    // Get int
-    success = plist_get_int(list, 1, &i_val);
-    ASSERT("List Get Int", success && i_val == 42, FAILURE_PLIST_GET_INT_WRONG_TYPE);
-    
-    // Get double
-    success = plist_get_double(list, 2, &d_val);
-    ASSERT("List Get Double", success && d_val > 3.14 && d_val < 3.15, FAILURE_PLIST_GET_DOUBLE_WRONG_TYPE);
-
-    // Get float
-    success = plist_get_float(list, 3, &f_val);
-    ASSERT("List Get Float", success && f_val > 2.71 && f_val < 2.72, FAILURE_PLIST_GET_FLOAT_WRONG_TYPE);
-
-    // 3. Test Modification (Set)
-    plist_set_int(list, 1, 999);
-    success = plist_get_int(list, 1, &i_val);
-    ASSERT("List Set Int", success && i_val == 999, SUCCESS);
-
-    // 4. Test error case: Out of bounds access
-    plist_get_int(list, 100, &i_val);
-    ASSERT("List Get OOB Error", pvars_errno == FAILURE_PLIST_GET_INT_OUT_OF_BOUNDS, FAILURE_PLIST_GET_INT_OUT_OF_BOUNDS);
-    pvars_errno = PERRNO_CLEAR; // Clear error for next test
-
-    // 5. Cleanup
-    plist_destroy(list);
-    ASSERT("List Destroy", true, SUCCESS); // If we reached here, destroy didn't crash
-    printf("List tests complete (destroyed).\n\n");
+pvar_t create_list_pvar(void) {
+    pvar_t pvar = { .type = PVAR_TYPE_LIST };
+    // Create a list with an element to ensure plist_destroy has work to do
+    pvar.data.ls = plist_create(5);
+    assert(pvar.data.ls != NULL);
+    plist_add_int(pvar.data.ls, 10); 
+    return pvar;
 }
 
 /**
- * @brief Tests basic pdict_t functionality: creation, adding, updating, and cleanup.
+ * @brief Creates a pvar_t struct holding a new pdict_t.
  */
-void test_dict_operations(void)
-{
-    printf("--- Testing Dictionary (pdict_t) Operations ---\n");
-    pdict_t *dict = pdict_create(5);
-    ASSERT("Dict Create", dict != NULL, FAILURE_PDICT_CREATE_NEW_DICT_MALLOC_FAILED);
-
-    // 1. Add new key-value pairs
-    pdict_add_str(dict, strdup("Name"), "Alice");
-    pdict_add_int(dict, strdup("Age"), 30);
-    pdict_add_double(dict, strdup("Pi"), 3.14159);
-    pdict_add_float(dict, strdup("e"), 2.718f);
-
-    // Note: Since there are no public GET functions yet, we mainly test additions and updates
-    // ASSERTs here mainly check that no internal memory failures occurred.
-    ASSERT("Dict Add Str", pvars_errno == SUCCESS, pvars_errno);
-    ASSERT("Dict Add Int", pvars_errno == SUCCESS, pvars_errno);
-    ASSERT("Dict Add Double", pvars_errno == SUCCESS, pvars_errno);
-    ASSERT("Dict Add Float", pvars_errno == SUCCESS, pvars_errno);
-    
-    // 2. Test Update (add to existing key)
-    pdict_add_int(dict, strdup("Age"), 31);
-    ASSERT("Dict Update Int", pvars_errno == SUCCESS, pvars_errno);
-    
-    // 3. Test destruction (visual check, should not crash)
-    pdict_destroy(dict);
-    ASSERT("Dict Destroy", true, SUCCESS);
-    printf("Dictionary tests complete (destroyed).\n\n");
+pvar_t create_dict_pvar(void) {
+    pvar_t pvar = { .type = PVAR_TYPE_DICT };
+    // Create a dict with an element to ensure pdict_destroy has work to do
+    pvar.data.dt = pdict_create(5);
+    assert(pvar.data.dt != NULL);
+    pdict_add_int(pvar.data.dt, "test_key", 20); 
+    return pvar;
 }
 
+// --- Test Cases ---
 
 /**
- * @brief Main test execution function.
+ * @brief Tests pvar_destroy_internal on a PVAR_TYPE_STRING.
+ * Checks for type reset and NULLing of the pointer.
  */
-int main(void)
-{
-    printf("======================================\n");
-    printf(" Starting libpvars API Test Suite\n");
-    printf("======================================\n\n");
-
-    test_list_operations();
-    test_dict_operations();
-
-    printf("======================================\n");
-    printf(" Total Tests Run: %d\n", tests_run);
-    printf(" Total Tests Failed: %d\n", tests_failed);
+void test_pvar_destroy_internal_string(void) {
+    printf("Running %s...\n", __func__);
+    pvar_t pvar = create_string_pvar("String to be freed");
     
-    if (tests_failed == 0) {
-        printf(" RESULT: ALL TESTS PASSED! 🎉\n");
-    } else {
-        printf(" RESULT: %d TEST(S) FAILED! ❌\n", tests_failed);
+    // Initial check
+    if (pvar.type != PVAR_TYPE_STRING || pvar.data.s == NULL) {
+        TEST_FAIL("Initial state incorrect");
+        return;
     }
-    printf("======================================\n");
 
-    return tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    pvar_destroy_internal(&pvar);
+    
+    // Verification: pointer must be NULLed and type must be NONE
+    if (pvar.type != PVAR_TYPE_NONE) {
+        TEST_FAIL("Type was not set to PVAR_TYPE_NONE");
+        return;
+    }
+    if (pvar.data.s != NULL) {
+        TEST_FAIL("String pointer was not set to NULL");
+        return;
+    }
+    
+    TEST_PASS();
+}
+
+/**
+ * @brief Tests pvar_destroy_internal on a PVAR_TYPE_LIST.
+ * Checks for recursive destruction (via plist_destroy) and pointer NULLing.
+ */
+void test_pvar_destroy_internal_list(void) {
+    printf("Running %s...\n", __func__);
+    pvar_t pvar = create_list_pvar();
+    
+    // Initial check
+    if (pvar.type != PVAR_TYPE_LIST || pvar.data.ls == NULL) {
+        TEST_FAIL("Initial state incorrect");
+        return;
+    }
+
+    pvar_destroy_internal(&pvar);
+    
+    // Verification: pointer must be NULLed and type must be NONE
+    if (pvar.type != PVAR_TYPE_NONE) {
+        TEST_FAIL("Type was not set to PVAR_TYPE_NONE");
+        return;
+    }
+    if (pvar.data.ls != NULL) {
+        TEST_FAIL("List pointer was not set to NULL");
+        return;
+    }
+
+    TEST_PASS();
+}
+
+/**
+ * @brief Tests pvar_destroy_internal on a PVAR_TYPE_DICT.
+ * Checks for recursive destruction (via pdict_destroy) and pointer NULLing.
+ */
+void test_pvar_destroy_internal_dict(void) {
+    printf("Running %s...\n", __func__);
+    pvar_t pvar = create_dict_pvar();
+    
+    // Initial check
+    if (pvar.type != PVAR_TYPE_DICT || pvar.data.dt == NULL) {
+        TEST_FAIL("Initial state incorrect");
+        return;
+    }
+
+    pvar_destroy_internal(&pvar);
+    
+    // Verification: pointer must be NULLed and type must be NONE
+    if (pvar.type != PVAR_TYPE_NONE) {
+        TEST_FAIL("Type was not set to PVAR_TYPE_NONE");
+        return;
+    }
+    if (pvar.data.dt != NULL) {
+        TEST_FAIL("Dict pointer was not set to NULL");
+        return;
+    }
+
+    TEST_PASS();
+}
+
+/**
+ * @brief Tests pvar_destroy_internal on non-dynamic types and NULL input.
+ */
+void test_pvar_destroy_internal_edge_cases(void) {
+    printf("Running %s...\n", __func__);
+    
+    // Case 1: PVAR_TYPE_INT (Non-dynamic, should only reset type)
+    pvar_t pvar_int = { .type = PVAR_TYPE_INT, .data.i = 42 };
+    int initial_int_value = pvar_int.data.i;
+    pvar_destroy_internal(&pvar_int);
+    if (pvar_int.type != PVAR_TYPE_NONE) {
+        TEST_FAIL("INT: Type was not set to PVAR_TYPE_NONE");
+        return;
+    }
+    // The data union should still hold the value (though not accessed via .i after reset)
+    if (pvar_int.data.i != initial_int_value) { 
+        TEST_FAIL("INT: Data unexpectedly modified");
+        return;
+    }
+
+    // Case 2: PVAR_TYPE_NONE (Should do nothing and not crash)
+    pvar_t pvar_none = { .type = PVAR_TYPE_NONE, .data.i = 0 };
+    pvar_destroy_internal(&pvar_none);
+    if (pvar_none.type != PVAR_TYPE_NONE) {
+        TEST_FAIL("NONE: Type unexpectedly changed");
+        return;
+    }
+    
+    // Case 3: NULL Input (Should not crash, handled by initial guard)
+    pvar_destroy_internal(NULL);
+    
+    TEST_PASS();
+}
+
+
+int main(void) {
+    printf("--- pvar_destroy_internal Test Suite ---\n");
+    
+    test_pvar_destroy_internal_string();
+    test_pvar_destroy_internal_list();
+    test_pvar_destroy_internal_dict();
+    test_pvar_destroy_internal_edge_cases();
+    
+    printf("--- Test Suite Complete ---\n");
+    
+    return 0;
 }

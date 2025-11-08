@@ -7,6 +7,7 @@
 
 #include"pvars.h"
 #include"perrno.h"
+#include"pvars_internal.h"
 #include"plist_internal.h"
 
 /**
@@ -49,22 +50,6 @@ plist_t *plist_create(long int initial_capacity)
 	return new_list;
 }
 
-/**
- * @brief Helper function to safely free dynamic data within a pvar_t element.
- *
- * This function only frees memory if the element type is a string, as other types
- * (int, double) are stored directly in the union and require no heap deallocation.
- * It also resets the element to a safe, uninitialized state.
- *
- * @param element A pointer to the pvar_t element.
- */
-static void pvar_free_data(pvar_t *element) {
-	if (element->type == PVAR_TYPE_STRING && element->data.s != NULL) {
-		free(element->data.s);
-	}
-	// Reset element to a known safe state (PVAR_TYPE_NONE, data.s=NULL)
-	memset(element, 0, sizeof(pvar_t));
-}
 
 /**
  * @brief Ensures there is capacity for one more element, resizing if necessary.
@@ -100,6 +85,48 @@ static bool plist_ensure_capacity(plist_t *list)
 	return true;
 }
 
+/**
+ * @brief Removes the element at a given index, shifting subsequent elements.
+ *
+ * Frees the data of the removed element, shifts the remaining elements down,
+ * and decrements the count.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to remove.
+ */
+void plist_remove(plist_t *list, size_t index)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_REMOVE_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_REMOVE_OUT_OF_BOUNDS;
+		return;
+	}
+
+	// 1. Free the memory of the element being removed
+	if (list->elements[index].type == PVAR_TYPE_LIST) {
+		plist_destroy(list->elements[index].data.ls);
+	}
+	pvar_destroy_internal(&list->elements[index]);
+
+	// 2. Shift all subsequent elements down
+	for (size_t i = index; i < list->count - 1; i++) {
+		// Copy the pvar_t struct, including type and union data
+		list->elements[i] = list->elements[i+1];
+	}
+
+	// 3. Zero out the last element that was just duplicated/moved
+
+	memset(&list->elements[list->count - 1], 0, sizeof(pvar_t));
+	
+	list->count--;
+	pvars_errno = SUCCESS;
+}
 
 /**
  * @brief Adds a single string to the list.
@@ -317,7 +344,7 @@ void plist_empty(plist_t *list)
 			/* Recursively empty internal list */
 			plist_destroy(list->elements[i].data.ls);
 		}
-		pvar_free_data(&list->elements[i]);
+		pvar_destroy_internal(&list->elements[i]);
 		
 	}
 
@@ -718,7 +745,7 @@ void plist_set_str(plist_t *list, size_t index, char *new_string)
 	if (element->type == PVAR_TYPE_LIST) {
 		plist_destroy(element->data.ls);
 	}
-	pvar_free_data(element);
+	pvar_destroy_internal(element);
 
 	char *current_str = strdup(new_string);
 	if (current_str == NULL) {
@@ -760,7 +787,7 @@ void plist_set_int(plist_t *list, size_t index, int new_value)
 	if (element->type == PVAR_TYPE_LIST) {
 		plist_destroy(element->data.ls);
 	}
-	pvar_free_data(element);
+	pvar_destroy_internal(element);
 
 	element->data.i = new_value;
 	element->type = PVAR_TYPE_INT; // Ensures the type is set correctly
@@ -796,7 +823,7 @@ void plist_set_double(plist_t *list, size_t index, double new_value)
 	if (element->type == PVAR_TYPE_LIST) {
 		plist_destroy(element->data.ls);
 	}
-	pvar_free_data(element);
+	pvar_destroy_internal(element);
 
 	element->data.d = new_value;
 	element->type = PVAR_TYPE_DOUBLE; // Ensures the type is set correctly
@@ -832,7 +859,7 @@ void plist_set_long(plist_t *list, size_t index, long new_value)
 	if (element->type == PVAR_TYPE_LIST) {
 		plist_destroy(element->data.ls);
 	}
-	pvar_free_data(element);
+	pvar_destroy_internal(element);
 
 	element->data.l = new_value;
 	element->type = PVAR_TYPE_LONG; // Ensures the type is set correctly
@@ -868,7 +895,7 @@ void plist_set_float(plist_t *list, size_t index, float new_value)
 	if (element->type == PVAR_TYPE_LIST) {
 		plist_destroy(element->data.ls);
 	}
-	pvar_free_data(element);
+	pvar_destroy_internal(element);
 
 	element->data.f = new_value;
 	element->type = PVAR_TYPE_FLOAT; // Ensures the type is set correctly
@@ -915,57 +942,13 @@ void plist_set_list(plist_t *list, size_t index, plist_t *new_list)
 	if (element->type == PVAR_TYPE_LIST) {
 		plist_destroy(element->data.ls);
 	}
-	pvar_free_data(element);
+	pvar_destroy_internal(element);
 
 	element->data.ls = deep_list;
 	element->type = PVAR_TYPE_LIST;
 	; // Ensures the type is set correctly
 }
 
-
-
-/**
- * @brief Removes the element at a given index, shifting subsequent elements.
- *
- * Frees the data of the removed element, shifts the remaining elements down,
- * and decrements the count.
- *
- * @param list The list to modify.
- * @param index The index of the element to remove.
- */
-void plist_remove(plist_t *list, size_t index)
-{
-	pvars_errno = PERRNO_CLEAR;
-
-	if (list == NULL) {
-		pvars_errno = FAILURE_PLIST_REMOVE_NULL_INPUT;
-		return;
-	}
-
-	if (index >= list->count) {
-		pvars_errno = FAILURE_PLIST_REMOVE_OUT_OF_BOUNDS;
-		return;
-	}
-
-	// 1. Free the memory of the element being removed
-	if (list->elements[index].type == PVAR_TYPE_LIST) {
-		plist_destroy(list->elements[index].data.ls);
-	}
-	pvar_free_data(&list->elements[index]);
-
-	// 2. Shift all subsequent elements down
-	for (size_t i = index; i < list->count - 1; i++) {
-		// Copy the pvar_t struct, including type and union data
-		list->elements[i] = list->elements[i+1];
-	}
-
-	// 3. Zero out the last element that was just duplicated/moved
-
-	memset(&list->elements[list->count - 1], 0, sizeof(pvar_t));
-	
-	list->count--;
-	pvars_errno = SUCCESS;
-}
 
 /**
  * @brief Checks for item in list.
