@@ -22,9 +22,5 @@ struct plist_t {
 
 /* Helper Function definitions */
 void plist_print_internal(plist_t *list);
-bool pvar_equals(pvar_t *a, pvar_t *b);
-
-pvar_t pvar_copy(const pvar_t *src);
-
 
 #endif /* PLIST_INTERNAL_H */
