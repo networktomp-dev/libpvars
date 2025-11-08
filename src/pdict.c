@@ -546,7 +546,7 @@ void pdict_add_list(pdict_t *dict, char *key, plist_t *value)
 		return;
 	}
 
-	char *new_list = plist_copy(value);
+	plist_t *new_list = plist_copy(value);
 	if (new_list == NULL) {
 		free(new_entry->key);
 		free(new_entry);
