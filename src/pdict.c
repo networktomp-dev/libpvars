@@ -125,6 +125,128 @@ void pdict_destroy(pdict_t *dict)
 	free(dict);
 }
 
+/**
+ * @brief Helper function to pdict_print
+ *
+ * @param dict_t pointer.
+ */
+void pdict_print_internal(pdict_t *dict)
+{
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_PRINT_INTERNAL_NULL_INPUT;
+		return;
+	}
+	
+	pvars_errno = PERRNO_CLEAR;
+
+	putchar('[');
+	
+	for (size_t i = 0; i < dict->capacity; i++) {
+		pdict_entry_t *current = dict->buckets[i];
+		while (current != NULL) {			
+			printf("[Key: \"%s\" | Value: ", current->key);
+			
+			switch (current->value.type) {
+				case PVAR_TYPE_STRING:
+					printf("\'%s\']", current->value.data.s);
+					break;
+				case PVAR_TYPE_LIST:	
+					plist_print_internal(current->value.data.ls);
+					putchar(']');
+					break;
+				case PVAR_TYPE_DICT:
+					pdict_print_internal(current->value.data.dt);
+					putchar(']');
+					break;
+				case PVAR_TYPE_INT:
+					printf("%d]", current->value.data.i);
+					break;
+				case PVAR_TYPE_DOUBLE:
+					printf("%lf]", current->value.data.d);
+					break;
+				case PVAR_TYPE_LONG:
+					printf("%d]", current->value.data.i);
+					break;
+				case PVAR_TYPE_FLOAT:
+					printf("%f]", current->value.data.f);
+					break;
+				case PVAR_TYPE_NONE:
+					printf("[TYPE: NONE]");
+					break;
+				default:
+					printf("[TYPE: UNKNOWN]");
+					break;
+			}
+			
+			current = current->next;
+		}
+	}
+	
+	putchar(']');
+}
+
+/**
+ * @brief Prints the full contents of a dict
+ *
+ * @param dict_t pointer.
+ */
+void pdict_print(pdict_t *dict)
+{
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_PRINT_NULL_INPUT;
+		return;
+	}
+	
+	pdict_print_internal(dict);
+	putchar('\n');
+} 
+ 
+/**
+ * @brief removes a pvar_t from a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @return void
+ */
+void pdict_remove(pdict_t *dict, const char *key)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_REMOVE_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_REMOVE_NULL_INPUT_KEY;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	
+	pdict_entry_t *current = dict->buckets[bucket_index];
+	pdict_entry_t *previous = NULL;
+	
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			if (previous == NULL) {
+				dict->buckets[bucket_index] = current->next;
+			} else {
+				previous->next = current->next;
+			}
+			pvar_destroy_internal(&(current->value));
+			free(current->key);
+			free(current);
+			
+			dict->count--;
+			return;
+		}
+		previous = current;
+		current = current->next;
+	}
+
+	pvars_errno = FAILURE_PDICT_REMOVE_KEY_NOT_FOUND;
+}
+
  
 /**
  * @brief Adds a string to a pdict_t variable
@@ -134,7 +256,7 @@ void pdict_destroy(pdict_t *dict)
  * @param The value to add to the dict
  * @return void
  */
-void pdict_add_str(pdict_t *dict, char *key, const char *value)
+void pdict_add_str(pdict_t *dict, const char *key, const char *value)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -215,7 +337,7 @@ void pdict_add_str(pdict_t *dict, char *key, const char *value)
  * @param The value to add to the dict
  * @return void
  */
-void pdict_add_int(pdict_t *dict, char *key, int value)
+void pdict_add_int(pdict_t *dict, const char *key, int value)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -275,7 +397,7 @@ void pdict_add_int(pdict_t *dict, char *key, int value)
  * @param The value to add to the dict
  * @return void
  */
-void pdict_add_double(pdict_t *dict, char *key, double value)
+void pdict_add_double(pdict_t *dict, const char *key, double value)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -335,7 +457,7 @@ void pdict_add_double(pdict_t *dict, char *key, double value)
  * @param The value to add to the dict
  * @return void
  */
-void pdict_add_long(pdict_t *dict, char *key, long value)
+void pdict_add_long(pdict_t *dict, const char *key, long value)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -395,7 +517,7 @@ void pdict_add_long(pdict_t *dict, char *key, long value)
  * @param The value to add to the dict
  * @return void
  */
-void pdict_add_float(pdict_t *dict, char *key, float value)
+void pdict_add_float(pdict_t *dict, const char *key, float value)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -455,7 +577,7 @@ void pdict_add_float(pdict_t *dict, char *key, float value)
  * @param The value to add to the dict
  * @return void
  */
-void pdict_add_list(pdict_t *dict, char *key, plist_t *value)
+void pdict_add_list(pdict_t *dict, const char *key, plist_t *value)
 {
 	pvars_errno = PERRNO_CLEAR;
 

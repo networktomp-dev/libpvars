@@ -2,6 +2,7 @@
 #define PDICT_INTERNAL_H
 
 #include"pvars.h"
+#include"plist_internal.h"
 
 /**
  * @brief Represents a single key-value pair in the dictionary.
@@ -26,6 +27,6 @@ struct pdict_t {
 };
 
 size_t pdict_hash(const char *key, size_t capacity);
-
+void pdict_print_internal(pdict_t *dict);
 
 #endif

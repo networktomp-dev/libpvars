@@ -108,19 +108,12 @@ void plist_remove(plist_t *list, size_t index)
 		return;
 	}
 
-	// 1. Free the memory of the element being removed
-	if (list->elements[index].type == PVAR_TYPE_LIST) {
-		plist_destroy(list->elements[index].data.ls);
-	}
 	pvar_destroy_internal(&list->elements[index]);
 
-	// 2. Shift all subsequent elements down
+	// Shift all subsequent elements down
 	for (size_t i = index; i < list->count - 1; i++) {
-		// Copy the pvar_t struct, including type and union data
 		list->elements[i] = list->elements[i+1];
 	}
-
-	// 3. Zero out the last element that was just duplicated/moved
 
 	memset(&list->elements[list->count - 1], 0, sizeof(pvar_t));
 	
@@ -338,14 +331,8 @@ void plist_empty(plist_t *list)
 		return;
 	}
 
-	// Free data for each element (only frees string memory if type is STRING)
 	for (size_t i = 0; i < list->count; i++) {
-		if (list->elements[i].type == PVAR_TYPE_LIST) {
-			/* Recursively empty internal list */
-			plist_destroy(list->elements[i].data.ls);
-		}
 		pvar_destroy_internal(&list->elements[i]);
-		
 	}
 
 	/* Reset count to 0 */
@@ -367,14 +354,12 @@ void plist_destroy(plist_t *list)
 		return;
 	}
 
-	/* Free all contents of the list */
 	plist_empty(list);
 
-	/* Free the data pointer array */
 	if (list->elements != NULL) {
 		free(list->elements);
 	}
-	/* Free the list structure itself */
+
 	free(list);
 	pvars_errno = SUCCESS;
 }
@@ -438,6 +423,9 @@ void plist_print_internal(plist_t *list)
 			case PVAR_TYPE_LIST:
 				/* Recursively print the internal list */
 				plist_print_internal(current.data.ls);
+				break;
+			case PVAR_TYPE_DICT:
+				pdict_print_internal(current.data.dt);
 				break;
 			case PVAR_TYPE_NONE: // <-- ADD THIS CASE
 				// Do nothing, or print 'NULL' if you prefer an explicit placeholder
@@ -741,10 +729,6 @@ void plist_set_str(plist_t *list, size_t index, char *new_string)
 	
 	pvar_t *element = &list->elements[index];
 
-	// Free the data of the existing element, regardless of its previous type
-	if (element->type == PVAR_TYPE_LIST) {
-		plist_destroy(element->data.ls);
-	}
 	pvar_destroy_internal(element);
 
 	char *current_str = strdup(new_string);
@@ -783,10 +767,6 @@ void plist_set_int(plist_t *list, size_t index, int new_value)
 	
 	pvar_t *element = &list->elements[index];
 
-	// Free the data of the existing element, regardless of its previous type
-	if (element->type == PVAR_TYPE_LIST) {
-		plist_destroy(element->data.ls);
-	}
 	pvar_destroy_internal(element);
 
 	element->data.i = new_value;
@@ -819,10 +799,6 @@ void plist_set_double(plist_t *list, size_t index, double new_value)
 	
 	pvar_t *element = &list->elements[index];
 
-	// Free the data of the existing element, regardless of its previous type
-	if (element->type == PVAR_TYPE_LIST) {
-		plist_destroy(element->data.ls);
-	}
 	pvar_destroy_internal(element);
 
 	element->data.d = new_value;
@@ -855,10 +831,6 @@ void plist_set_long(plist_t *list, size_t index, long new_value)
 	
 	pvar_t *element = &list->elements[index];
 
-	// Free the data of the existing element, regardless of its previous type
-	if (element->type == PVAR_TYPE_LIST) {
-		plist_destroy(element->data.ls);
-	}
 	pvar_destroy_internal(element);
 
 	element->data.l = new_value;
@@ -891,10 +863,6 @@ void plist_set_float(plist_t *list, size_t index, float new_value)
 	
 	pvar_t *element = &list->elements[index];
 
-	// Free the data of the existing element, regardless of its previous type
-	if (element->type == PVAR_TYPE_LIST) {
-		plist_destroy(element->data.ls);
-	}
 	pvar_destroy_internal(element);
 
 	element->data.f = new_value;
@@ -938,10 +906,6 @@ void plist_set_list(plist_t *list, size_t index, plist_t *new_list)
 		
 	pvar_t *element = &list->elements[index];
 
-	// Free the data of the existing element, regardless of its previous type
-	if (element->type == PVAR_TYPE_LIST) {
-		plist_destroy(element->data.ls);
-	}
 	pvar_destroy_internal(element);
 
 	element->data.ls = deep_list;

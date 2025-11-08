@@ -168,6 +168,20 @@ const char *perror_message(void)
 		case FAILURE_PDICT_CREATE_NEW_DICT_BUCKETS_MALLOC_FAILED:
 			return "FAILURE: Unable to allocate memory to new_dict->buckets in function pdict_create()";
 			
+		/* pdict_remove Failures */
+		case FAILURE_PDICT_REMOVE_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_remove()";
+		case FAILURE_PDICT_REMOVE_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_remove()";
+		case FAILURE_PDICT_REMOVE_KEY_NOT_FOUND:
+			return "FAILURE: Key not found in function pdict_remove()";
+		
+		/* pdict_print pdict_print_internal Failures */
+		case FAILURE_PDICT_PRINT_INTERNAL_NULL_INPUT:
+			return "FAILURE: NULL input passed to function pdict_print_internal()";
+		case FAILURE_PDICT_PRINT_NULL_INPUT:
+			return "FAILURE: NULL input passed to function pdict_print()";
+			
 		/* pdict_add_str Failures */
 		case FAILURE_PDICT_ADD_STR_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_str()";

@@ -2,10 +2,11 @@
 #define PLIST_INTERNAL_H
 
 #include<stdbool.h>
-
 #include <stddef.h> /* For size_t */
-#include "perrno.h" /* For pvar_type enum */
+
+#include"perrno.h" /* For pvar_type enum */
 #include"pvars.h"
+#include"pdict_internal.h"
 
 /**
  * @brief The full definition of the list structure.
