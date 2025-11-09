@@ -12,6 +12,8 @@ void pdict_empty(pdict_t *dict);
 void pdict_remove(pdict_t *dict, const char *key);
 
 void pdict_print(pdict_t *dict);
+size_t pdict_get_size(pdict_t *dict);
+size_t pdict_get_capacity(pdict_t *dict);
 
 void pdict_add_str(pdict_t *dict, const char *key, const char *value);
 void pdict_add_int(pdict_t *dict, const char *key, int value);

@@ -199,7 +199,43 @@ void pdict_print(pdict_t *dict)
 	
 	pdict_print_internal(dict);
 	putchar('\n');
-} 
+}
+
+/**
+ * @brief Returns the current number of elements in the dict.
+ *
+ * @param dict - The dict to query.
+ * @return The number of elements (dict->count) if the dict is valid, 
+ * or 0 if the dict is NULL.
+ */
+size_t pdict_get_size(pdict_t *dict)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (dict == NULL) {
+		return 0;
+	}
+	
+	return dict->count;
+}
+
+/**
+ * @brief Returns the current capacity of the dict.
+ *
+ * @param dict - The list to query.
+ * @return The capacity (dict->capacity) if the dict is valid, 
+ * or 0 if the dict is NULL.
+ */
+size_t pdict_get_capacity(pdict_t *dict)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (dict == NULL) {
+		return 0;
+	}
+	
+	return dict->capacity;
+}
  
 /**
  * @brief removes a pvar_t from a pdict_t variable
