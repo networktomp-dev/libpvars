@@ -684,3 +684,303 @@ void pdict_add_list(pdict_t *dict, const char *key, plist_t *value)
 	// (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
 }
+
+/**
+ * @brief Retrieves a string from a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to store the retrieved value
+ * @return bool
+ */
+bool pdict_get_str(pdict_t *dict, const char *key, char **out_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_STR_NULL_INPUT_DICT;
+		*out_value = NULL;
+		return false;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_STR_NULL_INPUT_KEY;
+		*out_value = NULL;
+		return false;
+	}
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_STR_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			if (current->value.type != PVAR_TYPE_STRING) {
+				pvars_errno = FAILURE_PDICT_GET_STR_WRONG_TYPE;
+				*out_value = NULL;
+				return false;
+			}
+
+			*out_value = strdup(current->value.data.s);
+			if (*out_value == NULL) {
+				pvars_errno = FAILURE_PDICT_GET_STR_STRDUP_FAILED;
+				 *out_value set to NULL
+				return false;
+			}
+			
+			pvars_errno = SUCCESS;
+			return true;
+		}
+		current = current->next;
+	}
+
+	pvars_errno = FAILURE_PDICT_GET_STR_KEY_NOT_FOUND;
+	*out_value = NULL;
+	return false;
+}
+
+/**
+ * @brief Retrieves a list from a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to store the retrieved value
+ * @return bool
+ */
+bool pdict_get_list(pdict_t *dict, const char *key, plist_t **out_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_LIST_NULL_INPUT_DICT;
+		*out_value = NULL;
+		return false;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_LIST_NULL_INPUT_KEY;
+		*out_value = NULL;
+		return false;
+	}
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_LIST_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			if (current->value.type != PVAR_TYPE_LIST) {
+				pvars_errno = FAILURE_PDICT_GET_LIST_WRONG_TYPE;
+				*out_value = NULL;
+				return false;
+			}
+
+			*out_value = plist_copy(current->value.data.ls);
+			if (*out_value == NULL) {
+				pvars_errno = FAILURE_PDICT_GET_LIST_PLIST_COPY_FAILED;
+				 *out_value set to NULL
+				return false;
+			}
+			
+			pvars_errno = SUCCESS;
+			return true;
+		}
+		current = current->next;
+	}
+
+	pvars_errno = FAILURE_PDICT_GET_LIST_KEY_NOT_FOUND;
+	*out_value = NULL;
+	return false;
+}
+
+/**
+ * @brief Retrieves an int from a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to store the retrieved value
+ * @return bool
+ */
+bool pdict_get_int(pdict_t *dict, const char *key, int *out_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_INT_NULL_INPUT_DICT;
+		return false;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_INT_NULL_INPUT_KEY;
+		return false;
+	}
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_INT_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			if (current->value.type != PVAR_TYPE_INT) {
+				pvars_errno = FAILURE_PDICT_GET_INT_WRONG_TYPE;
+				return false;
+			}
+
+			*out_value = current->value.data.i;
+			
+			pvars_errno = SUCCESS;
+			return true;
+		}
+		current = current->next;
+	}
+
+	pvars_errno = FAILURE_PDICT_GET_INT_KEY_NOT_FOUND;
+	return false;
+}
+
+/**
+ * @brief Retrieves a double from a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to store the retrieved value
+ * @return bool
+ */
+bool pdict_get_double(pdict_t *dict, const char *key, double *out_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_DOUBLE_NULL_INPUT_DICT;
+		return false;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_DOUBLE_NULL_INPUT_KEY;
+		return false;
+	}
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_DOUBLE_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			if (current->value.type != PVAR_TYPE_DOUBLE) {
+				pvars_errno = FAILURE_PDICT_GET_DOUBLE_WRONG_TYPE;
+				return false;
+			}
+
+			*out_value = current->value.data.d;
+			
+			pvars_errno = SUCCESS;
+			return true;
+		}
+		current = current->next;
+	}
+
+	pvars_errno = FAILURE_PDICT_GET_DOUBLE_KEY_NOT_FOUND;
+	return false;
+}
+
+/**
+ * @brief Retrieves a long from a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to store the retrieved value
+ * @return bool
+ */
+bool pdict_get_long(pdict_t *dict, const char *key, long *out_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_LONG_NULL_INPUT_DICT;
+		return false;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_LONG_NULL_INPUT_KEY;
+		return false;
+	}
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_LONG_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			if (current->value.type != PVAR_TYPE_LONG) {
+				pvars_errno = FAILURE_PDICT_GET_LONG_WRONG_TYPE;
+				return false;
+			}
+
+			*out_value = current->value.data.l;
+			
+			pvars_errno = SUCCESS;
+			return true;
+		}
+		current = current->next;
+	}
+
+	pvars_errno = FAILURE_PDICT_GET_LONG_KEY_NOT_FOUND;
+	return false;
+}
+
+/**
+ * @brief Retrieves a float from a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to store the retrieved value
+ * @return bool
+ */
+bool pdict_get_float(pdict_t *dict, const char *key, float *out_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_FLOAT_NULL_INPUT_DICT;
+		return false;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_FLOAT_NULL_INPUT_KEY;
+		return false;
+	}
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_FLOAT_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			if (current->value.type != PVAR_TYPE_FLOAT) {
+				pvars_errno = FAILURE_PDICT_GET_FLOAT_WRONG_TYPE;
+				return false;
+			}
+
+			*out_value = current->value.data.f;
+			
+			pvars_errno = SUCCESS;
+			return true;
+		}
+		current = current->next;
+	}
+
+	pvars_errno = FAILURE_PDICT_GET_FLOAT_KEY_NOT_FOUND;
+	return false;
+}

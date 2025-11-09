@@ -182,7 +182,7 @@ const char *perror_message(void)
 		case FAILURE_PDICT_PRINT_NULL_INPUT:
 			return "FAILURE: NULL input passed to function pdict_print()";
 			
-		/* pdict_add_str Failures */
+		/* pdict_add_str pdict_get_str Failures */
 		case FAILURE_PDICT_ADD_STR_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_str()";
 		case FAILURE_PDICT_ADD_STR_NULL_INPUT_KEY:
@@ -195,8 +195,20 @@ const char *perror_message(void)
 			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_str()";
 		case FAILURE_PDICT_ADD_STR_KEY_STRDUP_FAILED:
 			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_str()";
+		case FAILURE_PDICT_GET_STR_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_get_str(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_STR_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_get_str(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_STR_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function pdict_get_str().";
+		case FAILURE_PDICT_GET_STR_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected string) in function pdict_get_str(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_STR_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to *out_value in function pdict_get_str(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_STR_KEY_NOT_FOUND:
+			return "FAILURE: key not found in dict in function pdict_get_str(). *out_value set to NULL";
 		
-		/* pdict_add_int Failures */
+		/* pdict_add_int pdict_get_int Failures */
 		case FAILURE_PDICT_ADD_INT_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_int()";
 		case FAILURE_PDICT_ADD_INT_NULL_INPUT_KEY:
@@ -205,8 +217,18 @@ const char *perror_message(void)
 			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_int()";
 		case FAILURE_PDICT_ADD_INT_KEY_STRDUP_FAILED:
 			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_int()";
+		case FAILURE_PDICT_GET_INT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_get_int()";
+		case FAILURE_PDICT_GET_INT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_get_int()";
+		case FAILURE_PDICT_GET_INT_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function pdict_get_int()";
+		case FAILURE_PDICT_GET_INT_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected int) in function pdict_get_int().";
+		case FAILURE_PDICT_GET_INT_KEY_NOT_FOUND:
+			return "FAILURE: key not found in dict in function pdict_get_int()";
 		
-		/* pdict_add_double Failures */
+		/* pdict_add_double pdict_get_double Failures */
 		case FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_double()";
 		case FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_KEY:
@@ -215,8 +237,18 @@ const char *perror_message(void)
 			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_double()";
 		case FAILURE_PDICT_ADD_DOUBLE_KEY_STRDUP_FAILED:
 			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_double()";
+		case FAILURE_PDICT_GET_DOUBLE_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_get_double()";
+		case FAILURE_PDICT_GET_DOUBLE_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_get_double()";
+		case FAILURE_PDICT_GET_DOUBLE_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function pdict_get_double()";
+		case FAILURE_PDICT_GET_DOUBLE_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected double) in function pdict_get_double().";
+		case FAILURE_PDICT_GET_DOUBLE_KEY_NOT_FOUND:
+			return "FAILURE: key not found in dict in function pdict_get_double()";
 		
-		/* pdict_add_long Failures */
+		/* pdict_add_long pdict_add_long Failures */
 		case FAILURE_PDICT_ADD_LONG_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_long()";
 		case FAILURE_PDICT_ADD_LONG_NULL_INPUT_KEY:
@@ -225,8 +257,18 @@ const char *perror_message(void)
 			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_long()";
 		case FAILURE_PDICT_ADD_LONG_KEY_STRDUP_FAILED:
 			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_long()";
+		case FAILURE_PDICT_GET_LONG_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_get_long()";
+		case FAILURE_PDICT_GET_LONG_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_get_long()";
+		case FAILURE_PDICT_GET_LONG_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function pdict_get_long()";
+		case FAILURE_PDICT_GET_LONG_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected long) in function pdict_get_long().";
+		case FAILURE_PDICT_GET_LONG_KEY_NOT_FOUND:
+			return "FAILURE: key not found in dict in function pdict_get_long)";
 		
-		/* pdict_add_float Failures */
+		/* pdict_add_float pdict_add_float Failures */
 		case FAILURE_PDICT_ADD_FLOAT_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_float()";
 		case FAILURE_PDICT_ADD_FLOAT_NULL_INPUT_KEY:
@@ -235,8 +277,18 @@ const char *perror_message(void)
 			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_float()";
 		case FAILURE_PDICT_ADD_FLOAT_KEY_STRDUP_FAILED:
 			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_float()";
+		case FAILURE_PDICT_GET_FLOAT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_get_float()";
+		case FAILURE_PDICT_GET_FLOAT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_get_float()";
+		case FAILURE_PDICT_GET_FLOAT_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function pdict_get_float()";
+		case FAILURE_PDICT_GET_FLOAT_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected float) in function pdict_get_float().";
+		case FAILURE_PDICT_GET_FLOAT_KEY_NOT_FOUND:
+			return "FAILURE: key not found in dict in function pdict_get_float()";
 		
-		/* pdict_add_str Failures */
+		/* pdict_add_list pdict_get_list Failures */
 		case FAILURE_PDICT_ADD_LIST_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_list()";
 		case FAILURE_PDICT_ADD_LIST_NULL_INPUT_KEY:
@@ -249,6 +301,19 @@ const char *perror_message(void)
 			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_list()";
 		case FAILURE_PDICT_ADD_LIST_KEY_STRDUP_FAILED:
 			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_list()";
+		case FAILURE_PDICT_GET_LIST_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_get_list(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_LIST_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_get_list(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_LIST_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function pdict_get_list().";
+		case FAILURE_PDICT_GET_LIST_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected list) in function pdict_get_list(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_LIST_PLIST_COPY_FAILED:
+			return "FAILURE: plist_copy() failed to allocate memory to *out_value in function pdict_get_list(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_LIST_KEY_NOT_FOUND:
+			return "FAILURE: key not found in dict in function pdict_get_list(). *out_value set to NULL";
+
 
 		default:
 			return "Unknown error number";
