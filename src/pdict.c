@@ -74,7 +74,7 @@ pdict_t *pdict_create(long int initial_capacity)
  *
  * @param pdict_entry_t
  */
-pdict_entry_t *pdict_entry_copy(pdict_entry_t *src)
+pdict_entry_t *pdict_entry_copy(const pdict_entry_t *src)
 {
 	pvars_errno = PERRNO_CLEAR;
 	
@@ -224,7 +224,7 @@ void pdict_destroy(pdict_t *dict)
  *
  * @param dict_t pointer.
  */
-void pdict_print_internal(pdict_t *dict)
+void pdict_print_internal(const pdict_t *dict)
 {
 	if (dict == NULL) {
 		pvars_errno = FAILURE_PDICT_PRINT_INTERNAL_NULL_INPUT;
@@ -284,7 +284,7 @@ void pdict_print_internal(pdict_t *dict)
  *
  * @param dict_t pointer.
  */
-void pdict_print(pdict_t *dict)
+void pdict_print(const pdict_t *dict)
 {
 	if (dict == NULL) {
 		pvars_errno = FAILURE_PDICT_PRINT_NULL_INPUT;
@@ -302,7 +302,7 @@ void pdict_print(pdict_t *dict)
  * @return The number of elements (dict->count) if the dict is valid, 
  * or 0 if the dict is NULL.
  */
-size_t pdict_get_size(pdict_t *dict)
+size_t pdict_get_size(const pdict_t *dict)
 {
 	pvars_errno = PERRNO_CLEAR;
 	
@@ -320,7 +320,7 @@ size_t pdict_get_size(pdict_t *dict)
  * @return The capacity (dict->capacity) if the dict is valid, 
  * or 0 if the dict is NULL.
  */
-size_t pdict_get_capacity(pdict_t *dict)
+size_t pdict_get_capacity(const pdict_t *dict)
 {
 	pvars_errno = PERRNO_CLEAR;
 	
@@ -717,7 +717,7 @@ void pdict_add_float(pdict_t *dict, const char *key, float value)
  * @param The value to add to the dict
  * @return void
  */
-void pdict_add_list(pdict_t *dict, const char *key, plist_t *value)
+void pdict_add_list(pdict_t *dict, const char *key, const plist_t *value)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -799,7 +799,7 @@ void pdict_add_list(pdict_t *dict, const char *key, plist_t *value)
  * @param The value to add to the dict
  * @return void
  */
-void pdict_add_dict(pdict_t *dict, const char *key, pdict_t *value)
+void pdict_add_dict(pdict_t *dict, const char *key, const pdict_t *value)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -1224,4 +1224,57 @@ bool pdict_get_float(pdict_t *dict, const char *key, float *out_value)
 
 	pvars_errno = FAILURE_PDICT_GET_FLOAT_KEY_NOT_FOUND;
 	return false;
+}
+
+/**
+ * @brief Replaces an element with a string in a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add in to the dict
+ * @return void
+ */
+void pdict_set_str(pdict_t *dict, const char *key, const char *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_STR_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_STR_NULL_INPUT_KEY;
+		return;
+	}
+	if (value == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_STR_NULL_INPUT_VALUE;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+			char *new_string = strdup(value);
+			if (new_string == NULL) {
+				pvars_errno = FAILURE_PDICT_SET_STR_VALUE_STRDUP_FAILED;
+				return;
+			}
+
+			current->value.type = PVAR_TYPE_STRING;
+			current->value.data.s = new_string;
+			
+			pvars_errno = SUCCESS;
+			return;
+		}
+		current = current->next;
+	}
+	
+	pvars_errno = FAILURE_PDICT_SET_STR_VALUE_NOT_FOUND;
+    
+	// (Future) Check Load Factor and Resize
+	// You would place your load factor check and resize function call here.
 }

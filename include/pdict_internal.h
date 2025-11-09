@@ -27,6 +27,6 @@ struct pdict_t {
 };
 
 size_t pdict_hash(const char *key, size_t capacity);
-void pdict_print_internal(pdict_t *dict);
+void pdict_print_internal(const pdict_t *dict);
 
 #endif
