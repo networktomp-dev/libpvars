@@ -485,6 +485,8 @@ size_t plist_get_capacity(plist_t *list)
  */
 bool plist_get_str(plist_t *list, size_t index, char **out_value)
 {
+	pvars_errno = SUCCESS;
+	
 	if (list == NULL) {
 		pvars_errno = FAILURE_PLIST_GET_STR_NULL_INPUT;
 		return false;
@@ -497,7 +499,6 @@ bool plist_get_str(plist_t *list, size_t index, char **out_value)
 	
 	pvar_t *element = &list->elements[index];
 
-	// Check type before accessing data.s
 	if (element->type != PVAR_TYPE_STRING) {
 		pvars_errno = FAILURE_PLIST_GET_STR_WRONG_TYPE;
 		return false;
