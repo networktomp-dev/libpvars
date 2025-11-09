@@ -48,6 +48,44 @@ plist_t *plist_create(long int initial_capacity)
 	return new_list;
 }
 
+/**
+ * @brief Deep copy a list.
+ *
+ * @param list of elements
+ */
+plist_t *plist_copy(const plist_t *src)
+{
+	/* pvars_errno must be clear on each call to determine if pvar_copy fails recursively. See pvar_copy */
+	pvars_errno = PERRNO_CLEAR;
+	if (src == NULL) {
+		pvars_errno = FAILURE_PLIST_COPY_NULL_INPUT;
+		return NULL;
+	}
+	
+	plist_t *new_list = plist_create(src->capacity);
+	
+	if (new_list == NULL) {
+		pvars_errno = FAILURE_PLIST_COPY_PLIST_CREATE_FAILED;
+		return NULL;
+	}
+	
+	new_list->count = src->count;
+	
+	for (size_t i = 0; i < src->count; i++) {
+		pvar_t new_var = pvar_copy(&src->elements[i]);
+		if (!(pvars_errno == SUCCESS)) {
+			pvars_errno = FAILURE_PLIST_COPY_PVAR_COPY_FAILED;
+			plist_destroy(new_list);
+			return NULL;
+		}
+		new_list->elements[i] = new_var;
+	}
+	
+	pvars_errno = SUCCESS;
+	return new_list;
+	
+}
+
 
 /**
  * @brief Ensures there is capacity for one more element, resizing if necessary.
@@ -934,37 +972,4 @@ bool plist_contains(plist_t *list, pvar_t *element_to_find)
 	}
 	
 	return false;
-}
-
-plist_t *plist_copy(const plist_t *src)
-{
-	/* pvars_errno must be clear on each call to determine if pvar_copy fails recursively. See pvar_copy */
-	pvars_errno = PERRNO_CLEAR;
-	if (src == NULL) {
-		pvars_errno = FAILURE_PLIST_COPY_NULL_INPUT;
-		return NULL;
-	}
-	
-	plist_t *new_list = plist_create(src->capacity);
-	
-	if (new_list == NULL) {
-		pvars_errno = FAILURE_PLIST_COPY_PLIST_CREATE_FAILED;
-		return NULL;
-	}
-	
-	new_list->count = src->count;
-	
-	for (size_t i = 0; i < src->count; i++) {
-		pvar_t new_var = pvar_copy(&src->elements[i]);
-		if (!(pvars_errno == SUCCESS)) {
-			pvars_errno = FAILURE_PLIST_COPY_PVAR_COPY_FAILED;
-			plist_destroy(new_list);
-			return NULL;
-		}
-		new_list->elements[i] = new_var;
-	}
-	
-	pvars_errno = SUCCESS;
-	return new_list;
-	
 }

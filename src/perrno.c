@@ -168,6 +168,24 @@ const char *perror_message(void)
 		case FAILURE_PDICT_CREATE_NEW_DICT_BUCKETS_MALLOC_FAILED:
 			return "FAILURE: Unable to allocate memory to new_dict->buckets in function pdict_create()";
 			
+		/* pdict_entry_copy Failures */
+		case FAILURE_PDICT_ENTRY_COPY_NULL_INPUT:
+			return "FAILURE: NULL dict passed to function pdict_entry_copy()";
+		case FAILURE_PDICT_ENTRY_COPY_NEW_ENTRY_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to dest in function pdict_entry_copy()";
+		case FAILURE_PDICT_ENTRY_COPY_PVAR_COPY_FAILED:
+			return "FAILURE: pvar_copy() failed in function pdict_entry_copy()";
+		case FAILURE_PDICT_ENTRY_COPY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to key in function pdict_entry_copy()";
+	
+		/* pdict_copy Failures */
+		case FAILURE_PDICT_COPY_NULL_INPUT:
+			return "FAILURE: NULL dict passed to function pdict_copy()";
+		case FAILURE_PDICT_COPY_PDICT_CREATE_FAILED:
+			return "FAILURE: pdict_create() failed to allocate memory to new_dict in function pdict_copy()";
+		case FAILURE_PDICT_COPY_PDICT_ENTRY_COPY_FAILED:
+			return "FAILURE: pdict_entry_copy() failed to allocate memory to new_entry in function pdict_copy()";
+			
 		/* pdict_remove Failures */
 		case FAILURE_PDICT_REMOVE_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_remove()";
@@ -313,7 +331,32 @@ const char *perror_message(void)
 			return "FAILURE: plist_copy() failed to allocate memory to *out_value in function pdict_get_list(). *out_value set to NULL";
 		case FAILURE_PDICT_GET_LIST_KEY_NOT_FOUND:
 			return "FAILURE: key not found in dict in function pdict_get_list(). *out_value set to NULL";
-
+		
+		/* pdict_add_dict pdict_get_dict Failures */
+		case FAILURE_PDICT_ADD_DICT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_add_dict()";
+		case FAILURE_PDICT_ADD_DICT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_add_dict()";
+		case FAILURE_PDICT_ADD_DICT_NULL_INPUT_VALUE:
+			return "FAILURE: NULL value input passed to function pdict_add_dict()";
+		case FAILURE_PDICT_ADD_DICT_VALUE_PDICT_COPY_FAILED:
+			return "FAILURE: pdict_copy() failed to allocate memory to new_dict in function pdict_add_dict()";
+		case FAILURE_PDICT_ADD_DICT_ENTRY_MALLOC_FAILED:
+			return "FAILURE: Unable to allocate memory to new_entry in function pdict_add_dict()";
+		case FAILURE_PDICT_ADD_DICT_KEY_STRDUP_FAILED:
+			return "FAILURE: strdup() failed to allocate memory to new_entry->key in function pdict_add_dict()";
+		case FAILURE_PDICT_GET_DICT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_get_dict(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_DICT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_get_dict(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_DICT_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function pdict_get_dict().";
+		case FAILURE_PDICT_GET_DICT_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected dict) in function pdict_get_dict(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_DICT_PDICT_COPY_FAILED:
+			return "FAILURE: pdict_copy() failed to allocate memory to *out_value in function pdict_get_dict(). *out_value set to NULL";
+		case FAILURE_PDICT_GET_DICT_KEY_NOT_FOUND:
+			return "FAILURE: key not found in dict in function pdict_get_dict(). *out_value set to NULL";
 
 		default:
 			return "Unknown error number";

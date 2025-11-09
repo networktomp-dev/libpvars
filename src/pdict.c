@@ -69,7 +69,101 @@ pdict_t *pdict_create(long int initial_capacity)
 	return new_dict;
 }
 
+/**
+ * @brief Deep copies a pdict_entry_t variable.
+ *
+ * @param pdict_entry_t
+ */
+pdict_entry_t *pdict_entry_copy(pdict_entry_t *src)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (src == NULL) {
+		pvars_errno = FAILURE_PDICT_ENTRY_COPY_NULL_INPUT;
+		return NULL;
+	}
+	
+	pdict_entry_t *dest = calloc(1, sizeof(pdict_entry_t));
+	if (dest == NULL) {
+		pvars_errno = FAILURE_PDICT_ENTRY_COPY_NEW_ENTRY_MALLOC_FAILED;
+		return NULL;
+	}
+	
+	pvar_t new_pvar = pvar_copy(&src->value);
+	if (pvars_errno != SUCCESS) {
+		pvars_errno = FAILURE_PDICT_ENTRY_COPY_PVAR_COPY_FAILED;
+		free(dest);
+		return NULL;
+	}
+	
+	char *key = strdup(src->key);
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_ENTRY_COPY_STRDUP_FAILED;
+		free(dest);
+		return NULL;
+	}
+	
+	dest->value = new_pvar;
+	dest->key = key;
+	dest->next = NULL; 
+	
+	pvars_errno = SUCCESS;
+	return dest;
+}
 
+/**
+ * @brief Deep copy a dict.
+ *
+ * @param dict
+ */
+pdict_t *pdict_copy(const pdict_t *src)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (src == NULL) {
+		pvars_errno = FAILURE_PDICT_COPY_NULL_INPUT;
+		return NULL;
+	}
+	
+	pdict_t *new_dict = pdict_create(src->capacity);
+	if (new_dict == NULL) {
+		pvars_errno = FAILURE_PDICT_COPY_PDICT_CREATE_FAILED;
+		return NULL;
+	}
+	
+	for (size_t i = 0; i < src->capacity; i++) {
+		pdict_entry_t *current = src->buckets[i];
+		pdict_entry_t *new_head = NULL;
+		pdict_entry_t *new_tail = NULL;
+		
+		while (current != NULL) {
+			pdict_entry_t *new_entry = pdict_entry_copy(current);
+			if (new_entry == NULL) {
+				pvars_errno = FAILURE_PDICT_COPY_PDICT_ENTRY_COPY_FAILED;
+				pdict_destroy(new_dict);
+				return NULL;
+			}
+			
+			if (new_head == NULL) {
+				new_head = new_entry;
+				new_tail = new_entry;
+			} else {
+				new_tail->next = new_entry;
+				new_tail = new_entry;
+			}
+			
+			current = current->next;
+		}
+		
+		new_dict->buckets[i] = new_head;
+	}
+	
+	new_dict->count = src->count;
+	
+	pvars_errno = SUCCESS;
+	
+	return new_dict;
+}
 
 /**
  * @brief Empties the dict, but leaves dict and dict->buckets
@@ -359,6 +453,8 @@ void pdict_add_str(pdict_t *dict, const char *key, const char *value)
 	dict->buckets[bucket_index] = new_entry;
 
 	dict->count++;
+	
+	pvars_errno = SUCCESS;
     
 	// (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
@@ -420,6 +516,8 @@ void pdict_add_int(pdict_t *dict, const char *key, int value)
 	dict->buckets[bucket_index] = new_entry;
 
 	dict->count++;
+	
+	pvars_errno = SUCCESS;
     
 	// G. (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
@@ -480,6 +578,8 @@ void pdict_add_double(pdict_t *dict, const char *key, double value)
 	dict->buckets[bucket_index] = new_entry;
 
 	dict->count++;
+	
+	pvars_errno = SUCCESS;
     
 	// G. (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
@@ -540,6 +640,8 @@ void pdict_add_long(pdict_t *dict, const char *key, long value)
 	dict->buckets[bucket_index] = new_entry;
 
 	dict->count++;
+	
+	pvars_errno = SUCCESS;
     
 	// G. (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
@@ -600,6 +702,8 @@ void pdict_add_float(pdict_t *dict, const char *key, float value)
 	dict->buckets[bucket_index] = new_entry;
 
 	dict->count++;
+	
+	pvars_errno = SUCCESS;
     
 	// G. (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
@@ -680,6 +784,90 @@ void pdict_add_list(pdict_t *dict, const char *key, plist_t *value)
 	dict->buckets[bucket_index] = new_entry;
 
 	dict->count++;
+	
+	pvars_errno = SUCCESS;
+    
+	// (Future) Check Load Factor and Resize
+	// You would place your load factor check and resize function call here.
+}
+
+/**
+ * @brief Adds a dict to a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add to the dict
+ * @return void
+ */
+void pdict_add_dict(pdict_t *dict, const char *key, pdict_t *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_ADD_DICT_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_ADD_DICT_NULL_INPUT_KEY;
+		return;
+	}
+	if (value == NULL) {
+		pvars_errno = FAILURE_PDICT_ADD_DICT_NULL_INPUT_VALUE;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+			pdict_t *new_dict = pdict_copy(value);
+			if (new_dict == NULL) {
+				pvars_errno = FAILURE_PDICT_ADD_DICT_VALUE_PDICT_COPY_FAILED;
+				return;
+			}
+
+			current->value.type = PVAR_TYPE_DICT;
+			current->value.data.dt = new_dict;
+			return;
+		}
+		current = current->next;
+	}
+
+
+
+	pdict_entry_t *new_entry = calloc(1, sizeof(pdict_entry_t));
+	if (new_entry == NULL) {
+		pvars_errno = FAILURE_PDICT_ADD_DICT_ENTRY_MALLOC_FAILED;
+		return;
+	}
+
+	new_entry->key = strdup(key);
+	if (new_entry->key == NULL) {
+		free(new_entry);
+		pvars_errno = FAILURE_PDICT_ADD_DICT_KEY_STRDUP_FAILED;
+		return;
+	}
+
+	pdict_t *new_dict = pdict_copy(value);
+	if (new_dict == NULL) {
+		free(new_entry->key);
+		free(new_entry);
+		pvars_errno = FAILURE_PDICT_ADD_DICT_VALUE_PDICT_COPY_FAILED;
+		return;
+	}
+
+	new_entry->value.type = PVAR_TYPE_DICT;
+	new_entry->value.data.dt = new_dict;
+
+	new_entry->next = dict->buckets[bucket_index];
+	dict->buckets[bucket_index] = new_entry;
+
+	dict->count++;
+	
+	pvars_errno = SUCCESS;
     
 	// (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
@@ -726,7 +914,6 @@ bool pdict_get_str(pdict_t *dict, const char *key, char **out_value)
 			*out_value = strdup(current->value.data.s);
 			if (*out_value == NULL) {
 				pvars_errno = FAILURE_PDICT_GET_STR_STRDUP_FAILED;
-				 *out_value set to NULL
 				return false;
 			}
 			
@@ -782,7 +969,6 @@ bool pdict_get_list(pdict_t *dict, const char *key, plist_t **out_value)
 			*out_value = plist_copy(current->value.data.ls);
 			if (*out_value == NULL) {
 				pvars_errno = FAILURE_PDICT_GET_LIST_PLIST_COPY_FAILED;
-				 *out_value set to NULL
 				return false;
 			}
 			
@@ -793,6 +979,61 @@ bool pdict_get_list(pdict_t *dict, const char *key, plist_t **out_value)
 	}
 
 	pvars_errno = FAILURE_PDICT_GET_LIST_KEY_NOT_FOUND;
+	*out_value = NULL;
+	return false;
+}
+
+/**
+ * @brief Retrieves a dict from a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to store the retrieved value
+ * @return bool
+ */
+bool pdict_get_dict(pdict_t *dict, const char *key, pdict_t **out_value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_DICT_NULL_INPUT_DICT;
+		*out_value = NULL;
+		return false;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_DICT_NULL_INPUT_KEY;
+		*out_value = NULL;
+		return false;
+	}
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_DICT_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			if (current->value.type != PVAR_TYPE_DICT) {
+				pvars_errno = FAILURE_PDICT_GET_DICT_WRONG_TYPE;
+				*out_value = NULL;
+				return false;
+			}
+
+			*out_value = pdict_copy(current->value.data.dt);
+			if (*out_value == NULL) {
+				pvars_errno = FAILURE_PDICT_GET_DICT_PDICT_COPY_FAILED;
+				return false;
+			}
+			
+			pvars_errno = SUCCESS;
+			return true;
+		}
+		current = current->next;
+	}
+
+	pvars_errno = FAILURE_PDICT_GET_DICT_KEY_NOT_FOUND;
 	*out_value = NULL;
 	return false;
 }
