@@ -408,16 +408,7 @@ void pdict_add_str(pdict_t *dict, const char *key, const char *value)
 
 	while (current != NULL) {
 		if (strcmp(current->key, key) == STRING_MATCH) {
-			pvar_destroy_internal(&(current->value));
-
-			char *new_string = strdup(value);
-			if (new_string == NULL) {
-				pvars_errno = FAILURE_PDICT_ADD_STR_VALUE_STRDUP_FAILED;
-				return;
-			}
-
-			current->value.type = PVAR_TYPE_STRING;
-			current->value.data.s = new_string;
+			pvars_errno = FAILURE_PDICT_ADD_STR_KEY_EXISTS;
 			return;
 		}
 		current = current->next;
@@ -487,10 +478,7 @@ void pdict_add_int(pdict_t *dict, const char *key, int value)
 
 	while (current != NULL) {
 		if (strcmp(current->key, key) == STRING_MATCH) {
-			pvar_destroy_internal(&(current->value));
-
-			current->value.type = PVAR_TYPE_INT;
-			current->value.data.i = value;
+			pvars_errno = FAILURE_PDICT_ADD_INT_KEY_EXISTS;
 			return;
 		}
 		current = current->next;
@@ -549,10 +537,7 @@ void pdict_add_double(pdict_t *dict, const char *key, double value)
 
 	while (current != NULL) {
 		if (strcmp(current->key, key) == STRING_MATCH) {
-			pvar_destroy_internal(&(current->value));
-
-			current->value.type = PVAR_TYPE_DOUBLE;
-			current->value.data.d = value;
+			pvars_errno = FAILURE_PDICT_ADD_DOUBLE_KEY_EXISTS;
 			return;
 		}
 		current = current->next;
@@ -611,10 +596,7 @@ void pdict_add_long(pdict_t *dict, const char *key, long value)
 
 	while (current != NULL) {
 		if (strcmp(current->key, key) == STRING_MATCH) {
-			pvar_destroy_internal(&(current->value));
-
-			current->value.type = PVAR_TYPE_LONG;
-			current->value.data.l = value;
+			pvars_errno = FAILURE_PDICT_ADD_LONG_KEY_EXISTS;
 			return;
 		}
 		current = current->next;
@@ -673,10 +655,7 @@ void pdict_add_float(pdict_t *dict, const char *key, float value)
 
 	while (current != NULL) {
 		if (strcmp(current->key, key) == STRING_MATCH) {
-			pvar_destroy_internal(&(current->value));
-
-			current->value.type = PVAR_TYPE_FLOAT;
-			current->value.data.f = value;
+			pvars_errno = FAILURE_PDICT_ADD_FLOAT_KEY_EXISTS;
 			return;
 		}
 		current = current->next;
@@ -739,16 +718,7 @@ void pdict_add_list(pdict_t *dict, const char *key, const plist_t *value)
 
 	while (current != NULL) {
 		if (strcmp(current->key, key) == STRING_MATCH) {
-			pvar_destroy_internal(&(current->value));
-
-			plist_t *new_list = plist_copy(value);
-			if (new_list == NULL) {
-				pvars_errno = FAILURE_PDICT_ADD_LIST_VALUE_PLIST_COPY_FAILED;
-				return;
-			}
-
-			current->value.type = PVAR_TYPE_LIST;
-			current->value.data.ls = new_list;
+			pvars_errno = FAILURE_PDICT_ADD_LIST_KEY_EXISTS;
 			return;
 		}
 		current = current->next;
@@ -821,16 +791,7 @@ void pdict_add_dict(pdict_t *dict, const char *key, const pdict_t *value)
 
 	while (current != NULL) {
 		if (strcmp(current->key, key) == STRING_MATCH) {
-			pvar_destroy_internal(&(current->value));
-
-			pdict_t *new_dict = pdict_copy(value);
-			if (new_dict == NULL) {
-				pvars_errno = FAILURE_PDICT_ADD_DICT_VALUE_PDICT_COPY_FAILED;
-				return;
-			}
-
-			current->value.type = PVAR_TYPE_DICT;
-			current->value.data.dt = new_dict;
+			pvars_errno = FAILURE_PDICT_ADD_DICT_KEY_EXISTS;
 			return;
 		}
 		current = current->next;
