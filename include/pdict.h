@@ -39,9 +39,11 @@ void pdict_set_str(pdict_t *list, const char *key, const char *new_string);
 
 /* List accessors */
 bool pdict_get_list(pdict_t *dict, const char *key, plist_t **out_value);
+void pdict_set_list(pdict_t *dict, const char *key, const plist_t *value);
 
 /* Dict accessors */
 bool pdict_get_dict(pdict_t *dict, const char *key, pdict_t **out_value);
+void pdict_set_dict(pdict_t *dict, const char *key, const pdict_t *value);
 
 /* Int accessor */
 bool pdict_get_int(pdict_t *dict, const char *key, int *out_value);

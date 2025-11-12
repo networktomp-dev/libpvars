@@ -1239,3 +1239,103 @@ void pdict_set_str(pdict_t *dict, const char *key, const char *value)
 	// (Future) Check Load Factor and Resize
 	// You would place your load factor check and resize function call here.
 }
+
+/**
+ * @brief Replaces an element with a list in a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add in to the dict
+ * @return void
+ */
+void pdict_set_list(pdict_t *dict, const char *key, const plist_t *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_LIST_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_LIST_NULL_INPUT_KEY;
+		return;
+	}
+	if (value == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_LIST_NULL_INPUT_VALUE;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+			plist_t *new_list = plist_copy(value);
+			if (new_list == NULL) {
+				pvars_errno = FAILURE_PDICT_SET_LIST_VALUE_PLIST_COPY_FAILED;
+				return;
+			}
+
+			current->value.type = PVAR_TYPE_LIST;
+			current->value.data.ls = new_list;
+			
+			pvars_errno = SUCCESS;
+			return;
+		}
+		current = current->next;
+	}
+	
+	pvars_errno = FAILURE_PDICT_SET_LIST_VALUE_NOT_FOUND;
+}
+
+/**
+ * @brief Replaces an element with a dict in a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add in to the dict
+ * @return void
+ */
+void pdict_set_dict(pdict_t *dict, const char *key, const pdict_t *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_DICT_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_DICT_NULL_INPUT_KEY;
+		return;
+	}
+	if (value == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_DICT_NULL_INPUT_VALUE;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+			pdict_t *new_dict = pdict_copy(value);
+			if (new_dict == NULL) {
+				pvars_errno = FAILURE_PDICT_SET_DICT_VALUE_PDICT_COPY_FAILED;
+				return;
+			}
+
+			current->value.type = PVAR_TYPE_DICT;
+			current->value.data.dt = new_dict;
+			
+			pvars_errno = SUCCESS;
+			return;
+		}
+		current = current->next;
+	}
+	
+	pvars_errno = FAILURE_PDICT_SET_DICT_VALUE_NOT_FOUND;
+}

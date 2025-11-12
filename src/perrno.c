@@ -324,7 +324,7 @@ const char *perror_message(void)
 		case FAILURE_PDICT_GET_FLOAT_KEY_NOT_FOUND:
 			return "FAILURE: key not found in dict in function pdict_get_float()";
 		
-		/* pdict_add_list pdict_get_list Failures */
+		/* pdict_add_list pdict_get_list pdict_set_list Failures */
 		case FAILURE_PDICT_ADD_LIST_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_list()";
 		case FAILURE_PDICT_ADD_LIST_NULL_INPUT_KEY:
@@ -351,6 +351,16 @@ const char *perror_message(void)
 			return "FAILURE: plist_copy() failed to allocate memory to *out_value in function pdict_get_list(). *out_value set to NULL";
 		case FAILURE_PDICT_GET_LIST_KEY_NOT_FOUND:
 			return "FAILURE: key not found in dict in function pdict_get_list(). *out_value set to NULL";
+		case FAILURE_PDICT_SET_LIST_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_set_list()";
+		case FAILURE_PDICT_SET_LIST_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_set_list()";
+		case FAILURE_PDICT_SET_LIST_NULL_INPUT_VALUE:
+			return "FAILURE: NULL value input passed to function pdict_set_list()";
+		case FAILURE_PDICT_SET_LIST_VALUE_PLIST_COPY_FAILED:
+			return "FAILURE: plist_copy() failed to allocate memory to new_list in function pdict_set_list()";
+		case FAILURE_PDICT_SET_LIST_VALUE_NOT_FOUND:
+			return "FAILURE: Key not found in function pdict_set_list()";
 		
 		/* pdict_add_dict pdict_get_dict Failures */
 		case FAILURE_PDICT_ADD_DICT_NULL_INPUT_DICT:
@@ -379,6 +389,16 @@ const char *perror_message(void)
 			return "FAILURE: pdict_copy() failed to allocate memory to *out_value in function pdict_get_dict(). *out_value set to NULL";
 		case FAILURE_PDICT_GET_DICT_KEY_NOT_FOUND:
 			return "FAILURE: key not found in dict in function pdict_get_dict(). *out_value set to NULL";
+		case FAILURE_PDICT_SET_DICT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_set_pdict()";
+		case FAILURE_PDICT_SET_DICT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_set_pdict()";
+		case FAILURE_PDICT_SET_DICT_NULL_INPUT_VALUE:
+			return "FAILURE: NULL value input passed to function pdict_set_pdict)";
+		case FAILURE_PDICT_SET_DICT_VALUE_PDICT_COPY_FAILED:
+			return "FAILURE: pdict_copy() failed to allocate memory to new_dict in function pdict_set_dict()";
+		case FAILURE_PDICT_SET_DICT_VALUE_NOT_FOUND:
+			return "FAILURE: Key not found in function pdict_set_dict()";
 
 		default:
 			return "Unknown error number";
