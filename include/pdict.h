@@ -24,7 +24,10 @@ void pdict_print(const pdict_t *dict);
 size_t pdict_get_size(const pdict_t *dict);
 size_t pdict_get_capacity(const pdict_t *dict);
 pvar_type pdict_get_type(const pdict_t *dict, const char *key);
+
+/* Data Extraction */
 bool pdict_contains(const pdict_t *dict, const char *key);
+plist_t *pdict_get_keys(const pdict_t * dict);
 
 /* Core Add element functions (SINGLE ITEM ONLY) */
 void pdict_add_str(pdict_t *dict, const char *key, const char *value);

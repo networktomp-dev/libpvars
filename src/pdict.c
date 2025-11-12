@@ -401,6 +401,45 @@ pvar_type pdict_get_type(const pdict_t *dict, const char *key)
 	return false;
  }
  
+ /**
+ * @brief Exports all the keys available in a dict. This function is a shallow traversal only. It doesn't dive into inner dictionaries.
+ *
+ * @param dict The constant dictionary to query.
+ * @return A newly allocated plist_t containing PVAR_TYPE_STRING elements (deep copies of the keys). Returns NULL on failure. The caller is responsible for destroying the returned list.
+ */
+ plist_t *pdict_get_keys(const pdict_t * dict)
+ {
+ 	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_KEYS_NULL_INPUT;
+		return NULL;
+	}
+
+	plist_t *new_list = plist_create(dict->capacity);
+	if (new_list == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_KEYS_PLIST_CREATE_FAILED;
+		return NULL;
+	}
+	
+	for (size_t i = 0; i < dict->capacity; i++) {
+		pdict_entry_t *current = dict->buckets[i];
+		while (current != NULL) {
+			plist_add_str(new_list, current->key);
+			if (pvars_errno != SUCCESS) {
+				pvars_errno = FAILURE_PDICT_GET_KEYS_PLIST_ADD_STR_FAILED; // Intentional double handling of pvars_errno.
+				plist_destroy(new_list);
+				return NULL;
+			}
+			
+			current = current->next;
+		}
+	}
+
+	pvars_errno = SUCCESS;
+	return new_list;
+ }
+ 
 /**
  * @brief removes a pvar_t from a pdict_t variable
  *

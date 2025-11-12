@@ -477,6 +477,14 @@ const char *perror_message(void)
 			return "FAILURE: NULL input passed to function pdict_contains()";
 		case FAILURE_PDICT_CONTAINS_NULL_KEY_INPUT:
 			return "FAILURE: NULL key input passed to function pdict_contains()";
+		
+		/* pdict_get_keys Failures */
+		case FAILURE_PDICT_GET_KEYS_NULL_INPUT:
+			return "FAILURE: NULL input passed to function pdict_get_keys()";
+		case FAILURE_PDICT_GET_KEYS_PLIST_CREATE_FAILED:
+			return "FAILURE: plist_create() failed in function pdict_get_keys()";
+		case FAILURE_PDICT_GET_KEYS_PLIST_ADD_STR_FAILED:
+			return "FAILURE: plist_add_str() failed in function pdict_get_keys()";
 
 		default:
 			return "Unknown error number";
