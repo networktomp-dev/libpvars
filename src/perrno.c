@@ -463,6 +463,14 @@ const char *perror_message(void)
 			return "FAILURE: pdict_copy() failed to allocate memory to new_dict in function pdict_set_dict()";
 		case FAILURE_PDICT_SET_DICT_VALUE_NOT_FOUND:
 			return "FAILURE: Key not found in function pdict_set_dict()";
+		
+		/* pdict_get_type Failures */
+		case FAILURE_PDICT_GET_TYPE_NULL_INPUT:
+			return "FAILURE: NULL input passed to function pdict_get_type()";
+		case FAILURE_PDICT_GET_TYPE_NULL_KEY_INPUT:
+			return "FAILURE: NULL key input passed to function pdict_get_type()";
+		case FAILURE_PDICT_GET_TYPE_KEY_NOT_FOUND:
+			return "FAILURE: Key not found in function pdict_get_type()";
 
 		default:
 			return "Unknown error number";

@@ -330,6 +330,42 @@ size_t pdict_get_capacity(const pdict_t *dict)
 	
 	return dict->capacity;
 }
+
+/**
+ * @brief Returns the type of variable of a pdict_entry in the dict using the key.
+ *
+ * @param dict The dict to query.
+ * @param key
+ * @return pvar_type enum (PVAR_TYPE_NONE, PVAR_TYPE_STRING, etc) if the dict is valid, 
+ * or 0 if the dict is NULL, or the key is not found.
+ */
+pvar_type pdict_get_type(const pdict_t *dict, const char *key)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_TYPE_NULL_INPUT;
+		return PVAR_TYPE_NONE;
+	}
+	
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_TYPE_NULL_KEY_INPUT;
+		return PVAR_TYPE_NONE;
+	}
+	
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			return current->value.type;
+		}
+		current = current->next;
+	}
+	
+	pvars_errno = FAILURE_PDICT_GET_TYPE_KEY_NOT_FOUND;
+	return PVAR_TYPE_NONE;
+}
  
 /**
  * @brief removes a pvar_t from a pdict_t variable
