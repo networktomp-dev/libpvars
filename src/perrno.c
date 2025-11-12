@@ -471,6 +471,12 @@ const char *perror_message(void)
 			return "FAILURE: NULL key input passed to function pdict_get_type()";
 		case FAILURE_PDICT_GET_TYPE_KEY_NOT_FOUND:
 			return "FAILURE: Key not found in function pdict_get_type()";
+		
+		/* pdict_contains Failures */
+		case FAILURE_PDICT_CONTAINS_NULL_INPUT:
+			return "FAILURE: NULL input passed to function pdict_contains()";
+		case FAILURE_PDICT_CONTAINS_NULL_KEY_INPUT:
+			return "FAILURE: NULL key input passed to function pdict_contains()";
 
 		default:
 			return "Unknown error number";

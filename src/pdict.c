@@ -368,6 +368,40 @@ pvar_type pdict_get_type(const pdict_t *dict, const char *key)
 }
  
 /**
+ * @brief Searches for the existence of an entry in a dict
+ *
+ * @param dict The dict to query.
+ * @param key
+ * @return true if the entry exists, false if not
+ */
+ bool pdict_contains(const pdict_t *dict, const char *key)
+ {
+ 	pvars_errno = PERRNO_CLEAR;
+	
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_CONTAINS_NULL_INPUT;
+		return false;
+	}
+	
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_CONTAINS_NULL_KEY_INPUT;
+		return false;
+	}
+	
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			return true;
+		}
+		current = current->next;
+	}
+	
+	return false;
+ }
+ 
+/**
  * @brief removes a pvar_t from a pdict_t variable
  *
  * @param The address of a dict.
