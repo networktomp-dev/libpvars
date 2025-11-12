@@ -47,14 +47,18 @@ void pdict_set_dict(pdict_t *dict, const char *key, const pdict_t *value);
 
 /* Int accessor */
 bool pdict_get_int(pdict_t *dict, const char *key, int *out_value);
+void pdict_set_int(pdict_t *dict, const char *key, int value);
 
 /* Double accessor */
 bool pdict_get_double(pdict_t *dict, const char *key, double *out_value);
+void pdict_set_double(pdict_t *dict, const char *key, double value);
 
 /* Long accessor */
 bool pdict_get_long(pdict_t *dict, const char *key, long *out_value);
+void pdict_set_long(pdict_t *dict, const char *key, long value);
 
 /* Float accessor */
 bool pdict_get_float(pdict_t *dict, const char *key, float *out_value);
+void pdict_set_float(pdict_t *dict, const char *key, float value);
 
 #endif

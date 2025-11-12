@@ -446,9 +446,6 @@ void pdict_add_str(pdict_t *dict, const char *key, const char *value)
 	dict->count++;
 	
 	pvars_errno = SUCCESS;
-    
-	// (Future) Check Load Factor and Resize
-	// You would place your load factor check and resize function call here.
 }
 
 
@@ -506,9 +503,6 @@ void pdict_add_int(pdict_t *dict, const char *key, int value)
 	dict->count++;
 	
 	pvars_errno = SUCCESS;
-    
-	// G. (Future) Check Load Factor and Resize
-	// You would place your load factor check and resize function call here.
 }
 
 /**
@@ -565,9 +559,6 @@ void pdict_add_double(pdict_t *dict, const char *key, double value)
 	dict->count++;
 	
 	pvars_errno = SUCCESS;
-    
-	// G. (Future) Check Load Factor and Resize
-	// You would place your load factor check and resize function call here.
 }
 
 /**
@@ -624,9 +615,6 @@ void pdict_add_long(pdict_t *dict, const char *key, long value)
 	dict->count++;
 	
 	pvars_errno = SUCCESS;
-    
-	// G. (Future) Check Load Factor and Resize
-	// You would place your load factor check and resize function call here.
 }
 
 /**
@@ -1338,4 +1326,168 @@ void pdict_set_dict(pdict_t *dict, const char *key, const pdict_t *value)
 	}
 	
 	pvars_errno = FAILURE_PDICT_SET_DICT_VALUE_NOT_FOUND;
+}
+
+/**
+ * @brief Replaces an element with an int in a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add in to the dict
+ * @return void
+ */
+void pdict_set_int(pdict_t *dict, const char *key, int value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_INT_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_INT_NULL_INPUT_KEY;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+
+			current->value.type = PVAR_TYPE_INT;
+			current->value.data.i = value;
+			
+			pvars_errno = SUCCESS;
+			return;
+		}
+		current = current->next;
+	}
+	
+	pvars_errno = FAILURE_PDICT_SET_INT_VALUE_NOT_FOUND;
+}
+
+/**
+ * @brief Replaces an element with an double in a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add in to the dict
+ * @return void
+ */
+void pdict_set_double(pdict_t *dict, const char *key, double value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_DOUBLE_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_DOUBLE_NULL_INPUT_KEY;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+
+			current->value.type = PVAR_TYPE_DOUBLE;
+			current->value.data.d = value;
+			
+			pvars_errno = SUCCESS;
+			return;
+		}
+		current = current->next;
+	}
+	
+	pvars_errno = FAILURE_PDICT_SET_DOUBLE_VALUE_NOT_FOUND;
+}
+
+/**
+ * @brief Replaces an element with an long in a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add in to the dict
+ * @return void
+ */
+void pdict_set_long(pdict_t *dict, const char *key, long value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_LONG_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_LONG_NULL_INPUT_KEY;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+
+			current->value.type = PVAR_TYPE_LONG;
+			current->value.data.l = value;
+			
+			pvars_errno = SUCCESS;
+			return;
+		}
+		current = current->next;
+	}
+	
+	pvars_errno = FAILURE_PDICT_SET_LONG_VALUE_NOT_FOUND;
+}
+
+/**
+ * @brief Replaces an element with an float in a pdict_t variable
+ *
+ * @param The address of a dict.
+ * @param Char key
+ * @param The value to add in to the dict
+ * @return void
+ */
+void pdict_set_float(pdict_t *dict, const char *key, float value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_FLOAT_NULL_INPUT_DICT;
+		return;
+	}
+	if (key == NULL) {
+		pvars_errno = FAILURE_PDICT_SET_FLOAT_NULL_INPUT_KEY;
+		return;
+	}
+
+	size_t bucket_index = pdict_hash(key, dict->capacity);
+	pdict_entry_t *current = dict->buckets[bucket_index];
+
+	while (current != NULL) {
+		if (strcmp(current->key, key) == STRING_MATCH) {
+			pvar_destroy_internal(&(current->value));
+
+
+			current->value.type = PVAR_TYPE_FLOAT;
+			current->value.data.f = value;
+			
+			pvars_errno = SUCCESS;
+			return;
+		}
+		current = current->next;
+	}
+	
+	pvars_errno = FAILURE_PDICT_SET_FLOAT_VALUE_NOT_FOUND;
 }

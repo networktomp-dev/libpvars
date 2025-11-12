@@ -236,7 +236,7 @@ const char *perror_message(void)
 		case FAILURE_PDICT_SET_STR_VALUE_NOT_FOUND:
 			return "FAILURE: Key not found in function pdict_set_str()";
 		
-		/* pdict_add_int pdict_get_int Failures */
+		/* pdict_add_int pdict_get_int pdict_set_int Failures */
 		case FAILURE_PDICT_ADD_INT_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_int()";
 		case FAILURE_PDICT_ADD_INT_NULL_INPUT_KEY:
@@ -257,8 +257,14 @@ const char *perror_message(void)
 			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected int) in function pdict_get_int().";
 		case FAILURE_PDICT_GET_INT_KEY_NOT_FOUND:
 			return "FAILURE: key not found in dict in function pdict_get_int()";
+		case FAILURE_PDICT_SET_INT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_set_int()";
+		case FAILURE_PDICT_SET_INT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_set_int()";
+		case FAILURE_PDICT_SET_INT_VALUE_NOT_FOUND:
+			return "FAILURE: Key not found in function pdict_set_int()";
 		
-		/* pdict_add_double pdict_get_double Failures */
+		/* pdict_add_double pdict_get_double pdict_set_double Failures */
 		case FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_double()";
 		case FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_KEY:
@@ -279,8 +285,14 @@ const char *perror_message(void)
 			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected double) in function pdict_get_double().";
 		case FAILURE_PDICT_GET_DOUBLE_KEY_NOT_FOUND:
 			return "FAILURE: key not found in dict in function pdict_get_double()";
+		case FAILURE_PDICT_SET_DOUBLE_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_set_double()";
+		case FAILURE_PDICT_SET_DOUBLE_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_set_double()";
+		case FAILURE_PDICT_SET_DOUBLE_VALUE_NOT_FOUND:
+			return "FAILURE: Key not found in function pdict_set_double()";
 		
-		/* pdict_add_long pdict_add_long Failures */
+		/* pdict_add_long pdict_get_long pdict_set_long Failures */
 		case FAILURE_PDICT_ADD_LONG_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_long()";
 		case FAILURE_PDICT_ADD_LONG_NULL_INPUT_KEY:
@@ -301,8 +313,14 @@ const char *perror_message(void)
 			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected long) in function pdict_get_long().";
 		case FAILURE_PDICT_GET_LONG_KEY_NOT_FOUND:
 			return "FAILURE: key not found in dict in function pdict_get_long)";
+		case FAILURE_PDICT_SET_LONG_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_set_long()";
+		case FAILURE_PDICT_SET_LONG_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_set_long()";
+		case FAILURE_PDICT_SET_LONG_VALUE_NOT_FOUND:
+			return "FAILURE: Key not found in function pdict_set_long()";
 		
-		/* pdict_add_float pdict_add_float Failures */
+		/* pdict_add_float pdict_get_float pdict_set float Failures */
 		case FAILURE_PDICT_ADD_FLOAT_NULL_INPUT_DICT:
 			return "FAILURE: NULL dict input passed to function pdict_add_float()";
 		case FAILURE_PDICT_ADD_FLOAT_NULL_INPUT_KEY:
@@ -323,6 +341,12 @@ const char *perror_message(void)
 			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected float) in function pdict_get_float().";
 		case FAILURE_PDICT_GET_FLOAT_KEY_NOT_FOUND:
 			return "FAILURE: key not found in dict in function pdict_get_float()";
+		case FAILURE_PDICT_SET_FLOAT_NULL_INPUT_DICT:
+			return "FAILURE: NULL dict input passed to function pdict_set_float()";
+		case FAILURE_PDICT_SET_FLOAT_NULL_INPUT_KEY:
+			return "FAILURE: NULL key input passed to function pdict_set_float()";
+		case FAILURE_PDICT_SET_FLOAT_VALUE_NOT_FOUND:
+			return "FAILURE: Key not found in function pdict_set_float()";
 		
 		/* pdict_add_list pdict_get_list pdict_set_list Failures */
 		case FAILURE_PDICT_ADD_LIST_NULL_INPUT_DICT:
