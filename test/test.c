@@ -163,6 +163,7 @@ void test_plist_get_primitives(void)
 	ASSERT_TRUE(plist_get_str(list, 0, &s_val), "Get string success check");
 	ASSERT_EQUALS_INT(0, pvars_errno, "Get string errno check");
 	ASSERT_TRUE(strcmp(s_val, "Testing Get") == 0, "String value check");
+	free(s_val); // 🔥 FIX: Free the string copy allocated by plist_get_str
 
 	/* 2. Get Integer */
 	int i_val = 0;
@@ -214,6 +215,7 @@ void test_plist_set_primitives(void)
 	char *s_val = NULL;
 	ASSERT_TRUE(plist_get_str(list, 0, &s_val), "Set string success check");
 	ASSERT_TRUE(strcmp(s_val, "New String") == 0, "Set string value check");
+	free(s_val); // 🔥 FIX: Free the string copy allocated by plist_get_str
 
 	/* 2. Set Integer */
 	plist_set_int(list, 1, -99);
@@ -266,6 +268,8 @@ void test_plist_nested_and_utility(void)
 	plist_add_str(nested_list, "Should NOT appear in retrieved_list");
 	ASSERT_EQUALS_INT(2, plist_get_size(retrieved_list), "Deep copy check failure: size changed");
 
+	plist_destroy(retrieved_list); // 🔥 FIX: Destroy the list copy allocated by plist_get_list
+
 	/* Destroy the original nested list (the copy in 'list' should survive) */
 	plist_destroy(nested_list);
 
@@ -313,12 +317,15 @@ void test_plist_copy(void)
 	char *s_val = NULL;
 	plist_get_str(copy, 0, &s_val);
 	ASSERT_TRUE(strcmp(s_val, "Original String") == 0, "String was not deep copied");
+	free(s_val); // 🔥 FIX: Free the string copy allocated by plist_get_str
 
 	/* 2. Verify Deep Copy of Nested List */
 	plist_t *copy_nested = NULL;
 	plist_get_list(copy, 2, &copy_nested);
 	plist_add_int(original, 999); /* Add to original (not the nested part) */
 	ASSERT_EQUALS_INT(1, plist_get_size(copy_nested), "Nested list was not deep copied (size error)");
+	
+	plist_destroy(copy_nested); // 🔥 FIX: Destroy the list copy allocated by plist_get_list
 
 	plist_destroy(original);
 	plist_destroy(copy);
@@ -501,5 +508,3 @@ int main(void)
 		return EXIT_FAILURE;
 	}
 }
-
-

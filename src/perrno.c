@@ -37,8 +37,12 @@ const char *perror_message(void)
 			return "FAILURE: NULL input passed to function plist_get_str()";
 		case FAILURE_PLIST_GET_STR_OUT_OF_BOUNDS:
 			return "FAILURE: Passed index is out of bounds in function plist_get_str()";
+		case FAILURE_PLIST_GET_STR_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function plist_get_str()";
 		case FAILURE_PLIST_GET_STR_WRONG_TYPE:
 			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected string) in function plist_get_str()";
+		case FAILURE_PLIST_GET_STR_STRDUP_FAILED:
+			return "FAILURE: strdup() failed in function plist_get_str()";
 		case FAILURE_PLIST_SET_STR_NULL_INPUT:
 			return "FAILURE: NULL input passed to function plist_set_str()";
 		case FAILURE_PLIST_SET_STR_OUT_OF_BOUNDS:
@@ -115,8 +119,12 @@ const char *perror_message(void)
 			return "FAILURE: NULL input passed to function plist_get_list()";
 		case FAILURE_PLIST_GET_LIST_OUT_OF_BOUNDS:
 			return "FAILURE: Passed index is out of bounds in function plist_get_list()";
+		case FAILURE_PLIST_GET_LIST_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function plist_get_listt()";
 		case FAILURE_PLIST_GET_LIST_WRONG_TYPE:
 			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected plist_t) in function plist_get_list()";
+		case FAILURE_PLIST_GET_LIST_PLIST_COPY_FAILED:
+			return "FAILURE: plist_copy() failed in function plist_get_list()";
 		case FAILURE_PLIST_SET_LIST_NULL_INPUT:
 			return "FAILURE: NULL input passed to function plist_set_list()";
 		case FAILURE_PLIST_SET_LIST_OUT_OF_BOUNDS:
@@ -125,6 +133,32 @@ const char *perror_message(void)
 			return "FAILURE: NULL list input passed to function plist_set_list()";
 		case FAILURE_PLIST_SET_LIST_PLIST_COPY_FAILED:
 			return "FAILURE: plist_copy() failed in function plist_set_list()";
+		
+		/* plist_add_dict plist_get_dict plist_set_dict Failures */
+		case FAILURE_PLIST_ADD_DICT_NULL_INPUT:
+			return "FAILURE: NULL carrier list passed to function plist_add_dict()";
+		case FAILURE_PLIST_ADD_DICT_NULL_DICT_INPUT:
+			return "FAILURE: NULL dict passed to function plist_add_dict()";
+		case FAILURE_PLIST_ADD_DICT_PDICT_COPY_FAILED:
+			return "FAILURE: pdict_copy() failed in function plist_add_dict()";
+		case FAILURE_PLIST_GET_DICT_NULL_INPUT:
+			return "FAILURE: NULL input passed to function plist_get_dict()";
+		case FAILURE_PLIST_GET_DICT_OUT_OF_BOUNDS:
+			return "FAILURE: Passed index is out of bounds in function plist_get_dict()";
+		case FAILURE_PLIST_GET_DICT_NULL_INPUT_OUT_VALUE:
+			return "FAILURE: NULL out_value passed to function plist_get_dict()";
+		case FAILURE_PLIST_GET_DICT_WRONG_TYPE:
+			return "FAILURE: Cannot retrieve data: Element is not of the expected type (expected pdict_t) in function plist_get_dict()";
+		case FAILURE_PLIST_GET_DICT_PDICT_COPY_FAILED:
+			return "FAILURE: pdict_copy() failed in function plist_get_dict()";
+		case FAILURE_PLIST_SET_DICT_NULL_INPUT:
+			return "FAILURE: NULL input passed to function plist_set_dict()";
+		case FAILURE_PLIST_SET_DICT_OUT_OF_BOUNDS:
+			return "FAILURE: Passed index is out of bounds in function plist_set_dict()";
+		case FAILURE_PLIST_SET_DICT_NULL_DICT_INPUT:
+			return "FAILURE: NULL dict input passed to function plist_set_dict()";
+		case FAILURE_PLIST_SET_DICT_PDICT_COPY_FAILED:
+			return "FAILURE: pdict_copy() failed in function plist_set_dict()";
 
 		/* plist_contains Failures */
 		case FAILURE_PLIST_CONTAINS_NULL_INPUT:

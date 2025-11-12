@@ -320,7 +320,7 @@ void plist_add_float(plist_t *list, float value)
  * @param list The list to add to.
  * @param value The list to add.
  */
-void plist_add_list(plist_t *list, plist_t *value)
+void plist_add_list(plist_t *list, const plist_t *value)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -349,6 +349,47 @@ void plist_add_list(plist_t *list, plist_t *value)
 	// Populate the pvar_t struct fields
 	list->elements[list->count].data.ls = new_list;
 	list->elements[list->count].type = PVAR_TYPE_LIST;
+
+	list->count++;
+}
+
+/**
+ * @brief Adds a single dict to the list.
+ *
+ * The dict is duplicated using pdict_copy and stored in a new pvar_t element.
+ *
+ * @param list The list to add to.
+ * @param value The dict to add (will be duplicated).
+ */
+void plist_add_dict(plist_t *list, const pdict_t *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_DICT_NULL_INPUT;
+		return;
+	}
+
+	if (value == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_DICT_NULL_DICT_INPUT;
+		return;
+	}
+
+	/* Resize capacity if needed */
+	if (!plist_ensure_capacity(list)) {
+		// plist_ensure_capacity sets the error code
+		return;
+	}
+
+	pdict_t *new_dict = pdict_copy(value);
+
+	if (new_dict == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_DICT_PDICT_COPY_FAILED;
+		return;
+	}
+
+	list->elements[list->count].data.dt = new_dict;
+	list->elements[list->count].type = PVAR_TYPE_DICT;
 
 	list->count++;
 }
@@ -463,8 +504,7 @@ void plist_print_internal(plist_t *list)
 			case PVAR_TYPE_DICT:
 				pdict_print_internal(current.data.dt);
 				break;
-			case PVAR_TYPE_NONE: // <-- ADD THIS CASE
-				// Do nothing, or print 'NULL' if you prefer an explicit placeholder
+			case PVAR_TYPE_NONE:
 				printf("NULL"); 
 				break;
 			default:
@@ -535,6 +575,11 @@ bool plist_get_str(plist_t *list, size_t index, char **out_value)
 		return false;
 	}
 	
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_STR_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+	
 	pvar_t *element = &list->elements[index];
 
 	if (element->type != PVAR_TYPE_STRING) {
@@ -542,7 +587,11 @@ bool plist_get_str(plist_t *list, size_t index, char **out_value)
 		return false;
 	}
 	
-	*out_value = element->data.s;
+	*out_value = strdup(element->data.s);
+	if (*out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_STR_STRDUP_FAILED;
+		return false;
+	}
 	
 	pvars_errno = SUCCESS;
 	return true;
@@ -721,13 +770,61 @@ bool plist_get_list(plist_t *list, size_t index, plist_t **out_value)
 	
 	pvar_t *element = &list->elements[index];
 
-	// Check type before accessing data.s
 	if (element->type != PVAR_TYPE_LIST) {
 		pvars_errno = FAILURE_PLIST_GET_LIST_WRONG_TYPE;
 		return false;
 	}
 	
-	*out_value = element->data.ls;
+	*out_value = plist_copy(element->data.ls);
+	if (*out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_LIST_PLIST_COPY_FAILED;
+		return false;
+	}
+	
+	pvars_errno = SUCCESS;
+	return true;
+}
+
+/**
+ * @brief Retrieves the dict value at a given index.
+ *
+ * Performs boundary checks and checks if the element's type is PVAR_TYPE_DICT.
+ * The retrieved value is written to the pointer `out_value`.
+ *
+ * @param list The list to read from.
+ * @param index The index of the element to retrieve.
+ * @param out_value Pointer where the retrieved dict value should be stored.
+ * @return True on success, False on failure (with pvars_errno set).
+ */
+bool plist_get_dict(plist_t *list, size_t index, pdict_t **out_value)
+{
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_DICT_NULL_INPUT;
+		return false;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_GET_DICT_OUT_OF_BOUNDS;
+		return false;
+	}
+	
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_DICT_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	if (element->type != PVAR_TYPE_DICT) {
+		pvars_errno = FAILURE_PLIST_GET_DICT_WRONG_TYPE;
+		return false;
+	}
+	
+	*out_value = pdict_copy(element->data.dt);
+	if (*out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_DICT_PDICT_COPY_FAILED;
+		return false;
+	}
 	
 	pvars_errno = SUCCESS;
 	return true;
@@ -745,7 +842,7 @@ bool plist_get_list(plist_t *list, size_t index, plist_t **out_value)
  * @param index The index of the element to set.
  * @param new_string The new string to store (will be duplicated).
  */
-void plist_set_str(plist_t *list, size_t index, char *new_string)
+void plist_set_str(plist_t *list, size_t index, const char *new_string)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -916,7 +1013,7 @@ void plist_set_float(plist_t *list, size_t index, float new_value)
  * @param index The index of the element to set.
  * @param new_list The new list to store.
  */
-void plist_set_list(plist_t *list, size_t index, plist_t *new_list)
+void plist_set_list(plist_t *list, size_t index, const plist_t *new_list)
 {
 	pvars_errno = PERRNO_CLEAR;
 
@@ -948,6 +1045,49 @@ void plist_set_list(plist_t *list, size_t index, plist_t *new_list)
 	element->data.ls = deep_list;
 	element->type = PVAR_TYPE_LIST;
 	; // Ensures the type is set correctly
+}
+
+/**
+ * @brief Sets the dict value at a given index.
+ *
+ * The existing content of the element is freed first.
+ * A copy of the new dict is stored, and the element's type is set to DICT.
+ *
+ * @param list The list to modify.
+ * @param index The index of the element to set.
+ * @param new_dict The new dict to store (will be duplicated).
+ */
+void plist_set_dict(plist_t *list, size_t index, const pdict_t *new_dict)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_DICT_NULL_INPUT;
+		return;
+	}
+
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_SET_DICT_OUT_OF_BOUNDS;
+		return;
+	}
+
+	if (new_dict == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_DICT_NULL_DICT_INPUT;
+		return;
+	}
+	
+	pvar_t *element = &list->elements[index];
+
+	pvar_destroy_internal(element);
+
+	pdict_t *current_dict = pdict_copy(new_dict);
+	if (current_dict == NULL) {
+		pvars_errno = FAILURE_PLIST_SET_DICT_PDICT_COPY_FAILED;
+		return;
+	}
+
+	element->data.dt = current_dict;
+	element->type = PVAR_TYPE_DICT;
 }
 
 
