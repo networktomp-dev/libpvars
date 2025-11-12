@@ -88,6 +88,10 @@ typedef enum {
 	
 	/* plist_contains Failures */
 	FAILURE_PLIST_CONTAINS_NULL_INPUT,
+	
+	/* plist_get_type Failures */
+	FAILURE_PLIST_GET_TYPE_NULL_INPUT,
+	FAILURE_PLIST_GET_TYPE_OUT_OF_BOUNDS,
 
 	/* pvar_equals / pvar_copy Failures */
 	FAILURE_PVAR_EQUALS_NULL_INPUT,

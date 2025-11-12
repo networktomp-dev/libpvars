@@ -446,7 +446,7 @@ void plist_destroy(plist_t *list)
  *
  * @param list The list to print.
  */
-void plist_print(plist_t *list)
+void plist_print(const plist_t *list)
 {
 	if (list == NULL) {
 		pvars_errno = FAILURE_PLIST_PRINT_NULL_INPUT_LIST;
@@ -462,7 +462,7 @@ void plist_print(plist_t *list)
  *
  * @param list The list to print.
  */
-void plist_print_internal(plist_t *list)
+void plist_print_internal(const plist_t *list)
 {
 
 	if (list->elements == NULL) {
@@ -522,7 +522,7 @@ void plist_print_internal(plist_t *list)
  * @return The number of elements (list->count) if the list is valid, 
  * or 0 if the list is NULL.
  */
-size_t plist_get_size(plist_t *list)
+size_t plist_get_size(const plist_t *list)
 {
 	pvars_errno = PERRNO_CLEAR;
 	
@@ -540,7 +540,7 @@ size_t plist_get_size(plist_t *list)
  * @return The capacity (list->capacity) if the list is valid, 
  * or 0 if the list is NULL.
  */
-size_t plist_get_capacity(plist_t *list)
+size_t plist_get_capacity(const plist_t *list)
 {
 	pvars_errno = PERRNO_CLEAR;
 	
@@ -549,6 +549,30 @@ size_t plist_get_capacity(plist_t *list)
 	}
 	
 	return list->capacity;
+}
+
+/**
+ * @brief Returns the type of variable of an element in the list stored at the given index.
+ *
+ * @param list The list to query.
+ * @return pvar_type enum (PVAR_TYPE_NONE, PVAR_TYPE_STRING, etc) if the list is valid, 
+ * or 0 if the list is NULL, or the index is out of bounds.
+ */
+pvar_type plist_get_type(const plist_t *list, size_t index)
+{
+	pvars_errno = PERRNO_CLEAR;
+	
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_TYPE_NULL_INPUT;
+		return PVAR_TYPE_NONE;
+	}
+	
+	if (index >= list->count) {
+		pvars_errno = FAILURE_PLIST_GET_TYPE_OUT_OF_BOUNDS;
+		return PVAR_TYPE_NONE;
+	}
+	
+	return list->elements[index].type;
 }
 
 /**
@@ -561,7 +585,7 @@ size_t plist_get_capacity(plist_t *list)
  * @param index The index of the element to retrieve.
  * @return The string pointer, or NULL if the index is out of bounds or the type is incorrect.
  */
-bool plist_get_str(plist_t *list, size_t index, char **out_value)
+bool plist_get_str(const plist_t *list, size_t index, char **out_value)
 {
 	pvars_errno = SUCCESS;
 	
@@ -608,7 +632,7 @@ bool plist_get_str(plist_t *list, size_t index, char **out_value)
  * @param out_value Pointer where the retrieved integer value should be stored.
  * @return True on success, False on failure (with pvars_errno set).
  */
-bool plist_get_int(plist_t *list, size_t index, int *out_value)
+bool plist_get_int(const plist_t *list, size_t index, int *out_value)
 {
 	if (list == NULL || out_value == NULL) {
 		pvars_errno = FAILURE_PLIST_GET_INT_NULL_INPUT;
@@ -645,7 +669,7 @@ bool plist_get_int(plist_t *list, size_t index, int *out_value)
  * @param out_value Pointer where the retrieved double value should be stored.
  * @return True on success, False on failure (with pvars_errno set).
  */
-bool plist_get_double(plist_t *list, size_t index, double *out_value)
+bool plist_get_double(const plist_t *list, size_t index, double *out_value)
 {
 	if (list == NULL || out_value == NULL) {
 		pvars_errno = FAILURE_PLIST_GET_DOUBLE_NULL_INPUT;
@@ -682,7 +706,7 @@ bool plist_get_double(plist_t *list, size_t index, double *out_value)
  * @param out_value Pointer where the retrieved long value should be stored.
  * @return True on success, False on failure (with pvars_errno set).
  */
-bool plist_get_long(plist_t *list, size_t index, long *out_value)
+bool plist_get_long(const plist_t *list, size_t index, long *out_value)
 {
 	if (list == NULL || out_value == NULL) {
 		pvars_errno = FAILURE_PLIST_GET_LONG_NULL_INPUT;
@@ -719,7 +743,7 @@ bool plist_get_long(plist_t *list, size_t index, long *out_value)
  * @param out_value Pointer where the retrieved float value should be stored.
  * @return True on success, False on failure (with pvars_errno set).
  */
-bool plist_get_float(plist_t *list, size_t index, float *out_value)
+bool plist_get_float(const plist_t *list, size_t index, float *out_value)
 {
 	if (list == NULL || out_value == NULL) {
 		pvars_errno = FAILURE_PLIST_GET_FLOAT_NULL_INPUT;
@@ -756,7 +780,7 @@ bool plist_get_float(plist_t *list, size_t index, float *out_value)
  * @param out_value Pointer where the retrieved list value should be stored.
  * @return True on success, False on failure (with pvars_errno set).
  */
-bool plist_get_list(plist_t *list, size_t index, plist_t **out_value)
+bool plist_get_list(const plist_t *list, size_t index, plist_t **out_value)
 {
 	if (list == NULL) {
 		pvars_errno = FAILURE_PLIST_GET_LIST_NULL_INPUT;
@@ -796,7 +820,7 @@ bool plist_get_list(plist_t *list, size_t index, plist_t **out_value)
  * @param out_value Pointer where the retrieved dict value should be stored.
  * @return True on success, False on failure (with pvars_errno set).
  */
-bool plist_get_dict(plist_t *list, size_t index, pdict_t **out_value)
+bool plist_get_dict(const plist_t *list, size_t index, pdict_t **out_value)
 {
 	if (list == NULL) {
 		pvars_errno = FAILURE_PLIST_GET_DICT_NULL_INPUT;
@@ -1097,7 +1121,7 @@ void plist_set_dict(plist_t *list, size_t index, const pdict_t *new_dict)
  * @param list of elements
  * @param element to find in list
  */
-bool plist_contains(plist_t *list, pvar_t *element_to_find)
+bool plist_contains(const plist_t *list, pvar_t *element_to_find)
 {
 	if (list == NULL || element_to_find == NULL) {
 		pvars_errno = FAILURE_PLIST_CONTAINS_NULL_INPUT;

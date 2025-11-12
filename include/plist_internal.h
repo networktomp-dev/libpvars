@@ -21,6 +21,6 @@ struct plist_t {
 
 
 /* Helper Function definitions */
-void plist_print_internal(plist_t *list);
+void plist_print_internal(const plist_t *list);
 
 #endif /* PLIST_INTERNAL_H */

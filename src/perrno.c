@@ -163,7 +163,13 @@ const char *perror_message(void)
 		/* plist_contains Failures */
 		case FAILURE_PLIST_CONTAINS_NULL_INPUT:
 			return "FAILURE: NULL input passed to function plist_contains()";
-			
+		
+		/* plist_get_type Failures */
+		case FAILURE_PLIST_GET_TYPE_NULL_INPUT:
+			return "FAILURE: NULL input passed to function plist_get_type()";
+		case FAILURE_PLIST_GET_TYPE_OUT_OF_BOUNDS:
+			return "FAILURE: Passed index is out of bounds in function plist_get_type()";
+
 		/* pvar_equals / pvar_copy Failures */
 		case FAILURE_PVAR_EQUALS_NULL_INPUT:
 			return "FAILURE: NULL input passed to function pvar_equals()";
