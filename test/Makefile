@@ -1,11 +1,13 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -I../include -std=c11
-
+VAL = valgrind
+VFLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose
 LIB_DIR = ..
 SRC_DIR = ../src
 
 TEST_SRC = test.c
-TEST_EXEC = test_pvars
+TEST_EXEC = ./test_pvars
+TEST_RUN = $(VAL) $(VFLAGS) $(TEST_EXEC)
 
 LIB_NAME = $(LIB_DIR)/libpvars.a
 LIB_SRC_FILES = pdict.c plist.c perrno.c pvars.c
@@ -17,7 +19,7 @@ all: test
 
 test: $(TEST_EXEC)
 	@echo "--- Running Test Suite: $(TEST_EXEC) ---"
-	./$(TEST_EXEC)
+	$(TEST_RUN)
 
 $(TEST_EXEC): $(TEST_SRC) $(LIB_NAME)
 	@echo "Compiling and linking test executable: $@"

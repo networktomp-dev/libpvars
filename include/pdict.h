@@ -25,9 +25,6 @@ size_t pdict_get_size(const pdict_t *dict);
 size_t pdict_get_capacity(const pdict_t *dict);
 pvar_type pdict_get_type(const pdict_t *dict, const char *key);
 
-/* Data Extraction */
-bool pdict_contains(const pdict_t *dict, const char *key);
-plist_t *pdict_get_keys(const pdict_t * dict);
 
 /* Core Add element functions (SINGLE ITEM ONLY) */
 void pdict_add_str(pdict_t *dict, const char *key, const char *value);
@@ -37,6 +34,11 @@ void pdict_add_long(pdict_t *dict, const char *key, long value);
 void pdict_add_float(pdict_t *dict, const char *key, float value);
 void pdict_add_list(pdict_t *dict, const char *key, const plist_t *value);
 void pdict_add_dict(pdict_t *dict, const char *key, const pdict_t *value);
+
+/* Data Extraction */
+bool pdict_contains(const pdict_t *dict, const char *key);
+plist_t *pdict_get_keys(const pdict_t * dict);
+plist_t *pdict_get_values(const pdict_t *dict);
 
 /* String accessors */
 bool pdict_get_str(pdict_t *dict, const char *key, char **out_value);

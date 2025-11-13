@@ -374,8 +374,8 @@ pvar_type pdict_get_type(const pdict_t *dict, const char *key)
  * @param key
  * @return true if the entry exists, false if not
  */
- bool pdict_contains(const pdict_t *dict, const char *key)
- {
+bool pdict_contains(const pdict_t *dict, const char *key)
+{
  	pvars_errno = PERRNO_CLEAR;
 	
 	if (dict == NULL) {
@@ -399,16 +399,16 @@ pvar_type pdict_get_type(const pdict_t *dict, const char *key)
 	}
 	
 	return false;
- }
+}
  
- /**
+/**
  * @brief Exports all the keys available in a dict. This function is a shallow traversal only. It doesn't dive into inner dictionaries.
  *
  * @param dict The constant dictionary to query.
  * @return A newly allocated plist_t containing PVAR_TYPE_STRING elements (deep copies of the keys). Returns NULL on failure. The caller is responsible for destroying the returned list.
  */
- plist_t *pdict_get_keys(const pdict_t * dict)
- {
+plist_t *pdict_get_keys(const pdict_t * dict)
+{
  	pvars_errno = PERRNO_CLEAR;
 
 	if (dict == NULL) {
@@ -438,8 +438,47 @@ pvar_type pdict_get_type(const pdict_t *dict, const char *key)
 
 	pvars_errno = SUCCESS;
 	return new_list;
- }
+}
  
+/**
+ * @brief Exports all the values available in a dict. This function is a shallow traversal only. It doesn't dive into inner dictionaries.
+ *
+ * @param dict The constant dictionary to query.
+ * @return A newly allocated plist_t containing pvar_t elements (deep copies of the values). Returns NULL on failure. The caller is responsible for destroying the returned list.
+ */
+plist_t *pdict_get_values(const pdict_t *dict)
+{
+ 	pvars_errno = PERRNO_CLEAR;
+
+	if (dict == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_VALUES_NULL_INPUT;
+		return NULL;
+	}
+
+	plist_t *new_list = plist_create(dict->capacity);
+	if (new_list == NULL) {
+		pvars_errno = FAILURE_PDICT_GET_VALUES_PLIST_CREATE_FAILED;
+		return NULL;
+	}
+	
+	for (size_t i = 0; i < dict->capacity; i++) {
+		pdict_entry_t *current = dict->buckets[i];
+		while (current != NULL) {
+			plist_add_pvar(new_list, &(current->value));
+			if (pvars_errno != SUCCESS) {
+				pvars_errno = FAILURE_PDICT_GET_VALUES_PLIST_ADD_PVAR_FAILED;
+				plist_destroy(new_list);
+				return NULL;
+			}
+			
+			current = current->next;
+		}
+	}
+
+	pvars_errno = SUCCESS;
+	return new_list;
+}
+
 /**
  * @brief removes a pvar_t from a pdict_t variable
  *
@@ -853,9 +892,6 @@ void pdict_add_list(pdict_t *dict, const char *key, const plist_t *value)
 	dict->count++;
 	
 	pvars_errno = SUCCESS;
-    
-	// (Future) Check Load Factor and Resize
-	// You would place your load factor check and resize function call here.
 }
 
 /**
@@ -926,9 +962,6 @@ void pdict_add_dict(pdict_t *dict, const char *key, const pdict_t *value)
 	dict->count++;
 	
 	pvars_errno = SUCCESS;
-    
-	// (Future) Check Load Factor and Resize
-	// You would place your load factor check and resize function call here.
 }
 
 /**

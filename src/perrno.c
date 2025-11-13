@@ -23,15 +23,17 @@ const char *perror_message(void)
 			return "FAILURE: Unable to allocate memory to new_list->elements in function plist_create()";
 		
 		/* Core List Manipulation Failures */
-		case FAILURE_PLIST_ADD_NULL_INPUT_LIST:
-			return "FAILURE: Null list passed to function plist_add_*()";
 		case FAILURE_PLIST_ADD_REALLOC_FAILED:
 			return "FAILURE: realloc() failed to allocated memory when resizing list->elements in list add/set function";
 		
 		/* plist_add_str / plist_get_str / plist_set_str Failures */
-		case FAILURE_PLIST_ADD_NULL_STRING_INPUT:
+		case FAILURE_PLIST_ADD_STR_NULL_STRING_INPUT:
 			return "FAILURE: NULL string passed to function plist_add_str()";
-		case FAILURE_PLIST_ADD_STRDUP_FAILED:
+		case FAILURE_PLIST_ADD_STR_NULL_INPUT_LIST:
+			return "FAILURE: Null list passed to function plist_add_str()";
+		case FAILURE_PLIST_ADD_STR_PLIST_ENSURE_CAPACITY_FAILED:
+			return "FAILURE: plist_ensure_capacity() failed in function plist_add_string()";
+		case FAILURE_PLIST_ADD_STR_STRDUP_FAILED:
 			return "FAILURE: strdup() failed in function plist_add_str()";
 		case FAILURE_PLIST_GET_STR_NULL_INPUT:
 			return "FAILURE: NULL input passed to function plist_get_str()";
@@ -55,6 +57,8 @@ const char *perror_message(void)
 		/* plist_add_int / plist_get_int / plist_set_int Failures */
 		case FAILURE_PLIST_ADD_INT_NULL_INPUT:
 			return "FAILURE: NULL input list passed to function plist_add_int()";
+		case FAILURE_PLIST_ADD_INT_PLIST_ENSURE_CAPACITY_FAILED:
+			return "FAILURE: plist_ensure_capacity() failed in function plist_add_int()";
 		case FAILURE_PLIST_GET_INT_NULL_INPUT:
 			return "FAILURE: NULL list or NULL output pointer passed to function plist_get_int()";
 		case FAILURE_PLIST_GET_INT_OUT_OF_BOUNDS:
@@ -69,6 +73,8 @@ const char *perror_message(void)
 		/* plist_add_double / plist_get_double / plist_set_double Failures */
 		case FAILURE_PLIST_ADD_DOUBLE_NULL_INPUT:
 			return "FAILURE: NULL list passed to function plist_add_double()";
+		case FAILURE_PLIST_ADD_DOUBLE_PLIST_ENSURE_CAPACITY_FAILED:
+			return "FAILURE: plist_ensure_capacity() failed in function plist_add_double()";
 		case FAILURE_PLIST_GET_DOUBLE_NULL_INPUT:
 			return "FAILURE: NULL list or NULL output pointer passed to function plist_get_double()";
 		case FAILURE_PLIST_GET_DOUBLE_OUT_OF_BOUNDS:
@@ -83,6 +89,8 @@ const char *perror_message(void)
 		/* plist_add_long / plist_get_long / plist_set_long Failures */
 		case FAILURE_PLIST_ADD_LONG_NULL_INPUT:
 			return "FAILURE: NULL list passed to function plist_add_long()";
+		case FAILURE_PLIST_ADD_LONG_PLIST_ENSURE_CAPACITY_FAILED:
+			return "FAILURE: plist_ensure_capacity() failed in function plist_add_long()";
 		case FAILURE_PLIST_GET_LONG_NULL_INPUT:
 			return "FAILURE: NULL list or NULL output pointer passed to function plist_get_long()";
 		case FAILURE_PLIST_GET_LONG_OUT_OF_BOUNDS:
@@ -97,6 +105,8 @@ const char *perror_message(void)
 		/* plist_add_float / plist_get_float / plist_set_float Failures */
 		case FAILURE_PLIST_ADD_FLOAT_NULL_INPUT:
 			return "FAILURE: NULL list passed to function plist_add_float()";
+		case FAILURE_PLIST_ADD_FLOAT_PLIST_ENSURE_CAPACITY_FAILED:
+			return "FAILURE: plist_ensure_capacity() failed in function plist_add_float()";
 		case FAILURE_PLIST_GET_FLOAT_NULL_INPUT:
 			return "FAILURE: NULL list or NULL output pointer passed to function plist_get_float()";
 		case FAILURE_PLIST_GET_FLOAT_OUT_OF_BOUNDS:
@@ -113,6 +123,8 @@ const char *perror_message(void)
 			return "FAILURE: NULL carrier list passed to function plist_add_list()";
 		case FAILURE_PLIST_ADD_LIST_NULL_LIST_INPUT:
 			return "FAILURE: NULL list passed to function plist_add_list()";
+		case FAILURE_PLIST_ADD_LIST_PLIST_ENSURE_CAPACITY_FAILED:
+			return "FAILURE: plist_ensure_capacity() failed in function plist_add_list()";
 		case FAILURE_PLIST_ADD_LIST_PLIST_COPY_FAILED:
 			return "FAILURE: plist_copy() failed in function plist_add_list()";
 		case FAILURE_PLIST_GET_LIST_NULL_INPUT:
@@ -139,6 +151,8 @@ const char *perror_message(void)
 			return "FAILURE: NULL carrier list passed to function plist_add_dict()";
 		case FAILURE_PLIST_ADD_DICT_NULL_DICT_INPUT:
 			return "FAILURE: NULL dict passed to function plist_add_dict()";
+		case FAILURE_PLIST_ADD_DICT_PLIST_ENSURE_CAPACITY_FAILED:
+			return "FAILURE: plist_ensure_capacity() failed in function plist_add_dict()";
 		case FAILURE_PLIST_ADD_DICT_PDICT_COPY_FAILED:
 			return "FAILURE: pdict_copy() failed in function plist_add_dict()";
 		case FAILURE_PLIST_GET_DICT_NULL_INPUT:
@@ -159,6 +173,16 @@ const char *perror_message(void)
 			return "FAILURE: NULL dict input passed to function plist_set_dict()";
 		case FAILURE_PLIST_SET_DICT_PDICT_COPY_FAILED:
 			return "FAILURE: pdict_copy() failed in function plist_set_dict()";
+		
+		/* plist_add_pvar Failures */
+		case FAILURE_PLIST_ADD_PVAR_NULL_INPUT:
+			return "FAILURE: NULL carrier list passed to function plist_add_pvar()";
+		case FAILURE_PLIST_ADD_PVAR_NULL_PVAR_INPUT:
+			return "FAILURE: NULL pvar passed to function plist_add_pvar()";
+		case FAILURE_PLIST_ADD_PVAR_PLIST_ENSURE_CAPACITY_FAILED:
+			return "FAILURE: plist_ensure_capacity() failed in function plist_add_pvar()";
+		case FAILURE_PLIST_ADD_PVAR_PVAR_COPY_FAILED:
+			return "FAILURE: pvar_copy() failed in function plist_add_pvar()";
 
 		/* plist_contains Failures */
 		case FAILURE_PLIST_CONTAINS_NULL_INPUT:
@@ -485,6 +509,14 @@ const char *perror_message(void)
 			return "FAILURE: plist_create() failed in function pdict_get_keys()";
 		case FAILURE_PDICT_GET_KEYS_PLIST_ADD_STR_FAILED:
 			return "FAILURE: plist_add_str() failed in function pdict_get_keys()";
+		
+		/* pdict_get_values Failures */
+		case FAILURE_PDICT_GET_VALUES_NULL_INPUT:
+			return "FAILURE: NULL input passed to function pdict_get_values()";
+		case FAILURE_PDICT_GET_VALUES_PLIST_CREATE_FAILED:
+			return "FAILURE: plist_create() failed in function pdict_get_values()";
+		case FAILURE_PDICT_GET_VALUES_PLIST_ADD_PVAR_FAILED:
+			return "FAILURE: plist_add_pvar() failed in function pdict_get_values()";
 
 		default:
 			return "Unknown error number";

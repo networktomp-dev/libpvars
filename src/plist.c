@@ -170,12 +170,12 @@ void plist_add_str(plist_t *list, const char *value)
 	pvars_errno = PERRNO_CLEAR;
 
 	if (list == NULL) {
-		pvars_errno = FAILURE_PLIST_ADD_NULL_INPUT_LIST;
+		pvars_errno = FAILURE_PLIST_ADD_STR_NULL_INPUT_LIST;
 		return;
 	}
 
 	if (value == NULL) {
-		pvars_errno = FAILURE_PLIST_ADD_NULL_STRING_INPUT;
+		pvars_errno = FAILURE_PLIST_ADD_STR_NULL_STRING_INPUT;
 		return;
 	}
 
@@ -189,7 +189,7 @@ void plist_add_str(plist_t *list, const char *value)
 	char *new_str = strdup(value);
 
 	if (new_str == NULL) {
-		pvars_errno = FAILURE_PLIST_ADD_STRDUP_FAILED;
+		pvars_errno = FAILURE_PLIST_ADD_STR_STRDUP_FAILED;
 		return;
 	}
 
@@ -394,6 +394,45 @@ void plist_add_dict(plist_t *list, const pdict_t *value)
 	list->count++;
 }
 
+/**
+ * @brief Adds a single pvar to the list.
+ *
+ * The dict is duplicated using pvar_copy and stored in a new pvar_t element.
+ *
+ * @param list The list to add to.
+ * @param value The pvar to add (will be duplicated).
+ */
+void plist_add_pvar(plist_t *list, const pvar_t *value)
+{
+	pvars_errno = PERRNO_CLEAR;
+
+	if (list == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_PVAR_NULL_INPUT;
+		return;
+	}
+
+	if (value == NULL) {
+		pvars_errno = FAILURE_PLIST_ADD_PVAR_NULL_PVAR_INPUT;
+		return;
+	}
+
+	/* Resize capacity if needed */
+	if (!plist_ensure_capacity(list)) {
+		pvars_errno = FAILURE_PLIST_ADD_PVAR_PLIST_ENSURE_CAPACITY_FAILED;
+		return;
+	}
+
+	pvar_t new_pvar = pvar_copy(value);
+
+	if (pvars_errno != SUCCESS) {
+		pvars_errno = FAILURE_PLIST_ADD_PVAR_PVAR_COPY_FAILED;
+		return;
+	}
+
+	list->elements[list->count] = new_pvar;
+
+	list->count++;
+}
 
 /**
  * @brief Clears the list, freeing memory for all contained elements (like strings).

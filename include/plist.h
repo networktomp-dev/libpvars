@@ -38,6 +38,7 @@ void plist_add_long(plist_t *list, long value);
 void plist_add_float(plist_t *list, float value);
 void plist_add_list(plist_t *list, const plist_t *value);
 void plist_add_dict(plist_t *list, const pdict_t *value);
+void plist_add_pvar(plist_t *list, const pvar_t *value);
 
 /* String accessors */
 bool plist_get_str(const plist_t *list, size_t index, char **out_value);
