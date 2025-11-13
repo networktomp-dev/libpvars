@@ -341,9 +341,9 @@ int test_plist_add_dict(void)
 	TEST_END();
 }
 
-/* ------------------------ */
-/* Test 9: plist_add_pvar() */
-/* ------------------------ */
+/* ----------------------- */
+/* Test 9: plist_get_str() */
+/* ----------------------- */
 int test_plist_get_str(void)
 {
 	plist_t *list = plist_create(1);
@@ -358,7 +358,6 @@ int test_plist_get_str(void)
 	
 	/* Index 0 */
 	result = plist_get_str(list, 0, &string);
-	fprintf(stderr, "pvars_errno is %d\n", pvars_errno);
 	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
 	ASSERT_TRUE(string != NULL, "Failed to get string at index 0.");
 	ASSERT_TRUE(strcmp(string, "libpvars") == 0, "Expected string to match at index 0.");
@@ -415,19 +414,342 @@ int test_plist_get_str(void)
 	TEST_END();
 }
 
-/* ---------------------- */
-/* Test 1: plist_copy() */
-/* ---------------------- */
-int test_plist_copy(void)
+/* ------------------------ */
+/* Test 10: plist_get_int() */
+/* ------------------------ */
+int test_plist_get_int(void)
 {
-	plist_t *list = plist_create(0);
-	ASSERT_TRUE(list != NULL, "List allocation failed.");
-	ASSERT_TRUE(list->count == 0, "Initial list count should be 0.");
-
+	plist_t *list = plist_create(1);
+	
+	plist_add_int(list, 0);
+	plist_add_int(list, 12);
+	plist_add_str(list, "libpvars");
+	plist_add_int(list, 1234);
+	
+	int value = 1;
+	bool result;
+	
+	/* Index 0 */
+	result = plist_get_int(list, 0, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	ASSERT_TRUE(value == 0, "Expected value to be 0 at index 0.");
+	
+	/* Index 1 */
+	result = plist_get_int(list, 1, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	ASSERT_TRUE(value == 12, "Expected value to be 12 at index 1.");
+	
+	/* Index 2 */
+	/* Wrong type check */
+	result = plist_get_int(list, 2, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 2.");
+	ASSERT_TRUE(pvars_errno != SUCCESS, "Expected pvars_errno != SUCCESS at index 2.");
+	
+	/* Index 3 */
+	result = plist_get_int(list, 3, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 3.");
+	ASSERT_TRUE(value == 1234, "Expected value to be 1234 at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	result = plist_get_int(list, 15, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_INT_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_GET_INT_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	result = plist_get_int(null_list, 0, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 5.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_INT_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_INT_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL out_value check  */
+	int *null_int_ptr = NULL;
+	result = plist_get_int(list, 0, null_int_ptr);
+	ASSERT_TRUE(result == false, "Expected result == false at index 6.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_INT_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_INT_NULL_INPUT at index 6.");
+	
 	plist_destroy(list);
 	
 	TEST_END();
 }
+
+/* ------------------------- */
+/* Test 11: plist_get_long() */
+/* ------------------------- */
+int test_plist_get_long(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_long(list, 0);
+	plist_add_long(list, 12);
+	plist_add_str(list, "libpvars");
+	plist_add_long(list, 1234);
+	
+	long value = 1;
+	bool result;
+	
+	/* Index 0 */
+	result = plist_get_long(list, 0, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	ASSERT_TRUE(value == 0, "Expected value to be 0 at index 0.");
+	
+	/* Index 1 */
+	result = plist_get_long(list, 1, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	ASSERT_TRUE(value == 12, "Expected value to be 12 at index 1.");
+	
+	/* Index 2 */
+	/* Wrong type check */
+	result = plist_get_long(list, 2, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 2.");
+	ASSERT_TRUE(pvars_errno != SUCCESS, "Expected pvars_errno != SUCCESS at index 2.");
+	
+	/* Index 3 */
+	result = plist_get_long(list, 3, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 3.");
+	ASSERT_TRUE(value == 1234, "Expected value to be 1234 at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	result = plist_get_long(list, 15, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_LONG_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_GET_LONG_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	result = plist_get_long(null_list, 0, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 5.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_LONG_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_LONG_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL out_value check  */
+	long *null_long_ptr = NULL;
+	result = plist_get_long(list, 0, null_long_ptr);
+	ASSERT_TRUE(result == false, "Expected result == false at index 6.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_LONG_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_LONG_NULL_INPUT at index 6.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* --------------------------- */
+/* Test 12: plist_get_double() */
+/* --------------------------- */
+int test_plist_get_double(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_double(list, 0.7);
+	plist_add_double(list, 12.2);
+	plist_add_str(list, "libpvars");
+	plist_add_double(list, 1234.4);
+	
+	double value = 1.5;
+	bool result;
+	
+	/* Index 0 */
+	result = plist_get_double(list, 0, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	ASSERT_TRUE(fabs(value - 0.7) < (DBL_EPSILON * fmax(fabs(value), fabs(0.7))), "Expected value to be 0.7 at index 0.");
+	
+	/* Index 1 */
+	result = plist_get_double(list, 1, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	ASSERT_TRUE(fabs(value - 12.2) < (DBL_EPSILON * fmax(fabs(value), fabs(12.2))), "Expected value to be 12.4 at index 1.");
+	
+	/* Index 2 */
+	/* Wrong type check */
+	result = plist_get_double(list, 2, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 2.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_DOUBLE_WRONG_TYPE, "Expected pvars_errno == FAILURE_PLIST_GET_DOUBLE_WRONG_TYPE at index 2.");
+	
+	/* Index 3 */
+	result = plist_get_double(list, 3, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 3.");
+	ASSERT_TRUE(fabs(value - 1234.4) < (DBL_EPSILON * fmax(fabs(value), fabs(1234.4))), "Expected value to be 1234.4 at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	result = plist_get_double(list, 15, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_DOUBLE_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_GET_DOUBLE_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	result = plist_get_double(null_list, 0, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 5.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_DOUBLE_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_DOUBLE_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL out_value check  */
+	double *null_double_ptr = NULL;
+	result = plist_get_double(list, 0, null_double_ptr);
+	ASSERT_TRUE(result == false, "Expected result == false at index 6.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_DOUBLE_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_DOUBLE_NULL_INPUT at index 6.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* --------------------------- */
+/* Test 13: plist_get_float() */
+/* --------------------------- */
+int test_plist_get_float(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_float(list, 0.7);
+	plist_add_float(list, 12.2);
+	plist_add_str(list, "libpvars");
+	plist_add_float(list, 1234.4);
+	
+	float value = 1.5;
+	bool result;
+	
+	/* Index 0 */
+	result = plist_get_float(list, 0, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	ASSERT_TRUE(fabsf(value - 0.7f) < FLT_EPSILON, "Expected value to be 0.7 at index 0.");
+	
+	/* Index 1 */
+	result = plist_get_float(list, 1, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	ASSERT_TRUE(fabsf(value - 12.2f) < FLT_EPSILON, "Expected value to be 12.4 at index 1.");
+	
+	/* Index 2 */
+	/* Wrong type check */
+	result = plist_get_float(list, 2, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 2.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_FLOAT_WRONG_TYPE, "Expected pvars_errno == FAILURE_PLIST_GET_FLOAT_WRONG_TYPE at index 2.");
+	
+	/* Index 3 */
+	result = plist_get_float(list, 3, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 3.");
+	ASSERT_TRUE(fabsf(value - 1234.4f) < FLT_EPSILON, "Expected value to be 1234.4 at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	result = plist_get_float(list, 15, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_FLOAT_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_GET_FLOAT_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	result = plist_get_float(null_list, 0, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 5.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_FLOAT_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_FLOAT_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL out_value check  */
+	float *null_float_ptr = NULL;
+	result = plist_get_float(list, 0, null_float_ptr);
+	ASSERT_TRUE(result == false, "Expected result == false at index 6.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_FLOAT_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_FLOAT_NULL_INPUT at index 6.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* ------------------------- */
+/* Test 14: plist_get_list() */
+/* ------------------------- */
+int test_plist_get_list(void)
+{
+	plist_t *list = plist_create(1);
+	plist_t *list_child1 = plist_create(1);
+	plist_t *list_child2 = plist_create(1);
+	plist_t *list_child3 = plist_create(1);
+	
+	plist_add_str(list_child1, "libpvars");
+	plist_add_str(list_child1, "1.0.0.0");
+	plist_add_int(list_child2, 12);
+	plist_add_long(list_child2, 64123);
+	plist_add_float(list_child3, 12.5);
+	plist_add_double(list_child3, 65.645);
+	
+	plist_add_list(list, list_child1);
+	plist_add_list(list, list_child2);
+	plist_add_int(list, 16);
+	plist_add_list(list, list_child3);
+	
+	plist_t *value = NULL;
+	bool result;
+	
+	/* Index 0 */
+	result = plist_get_list(list, 0, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	ASSERT_TRUE(value != NULL, "Failed to get value at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	plist_destroy(value);
+	
+	/* Index 1 */
+	result = plist_get_list(list, 1, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	ASSERT_TRUE(value != NULL, "Failed to get value at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	plist_destroy(value);
+	
+	/* Index 2 */
+	/* Wrong type check */
+	result = plist_get_list(list, 2, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 2.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_LIST_WRONG_TYPE, "Expected pvars_errno == FAILURE_PLIST_GET_LIST_WRONG_TYPE at index 2.");
+	
+	/* Index 3 */
+	result = plist_get_list(list, 3, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 3.");
+	ASSERT_TRUE(value != NULL, "Failed to get string at index 3.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 3.");
+	plist_destroy(value);
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	result = plist_get_list(list, 15, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_LIST_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_GET_LIST_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	result = plist_get_list(null_list, 0, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 5.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_LIST_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_LIST_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL out_value check  */
+	plist_t **null_list_ptr = NULL;
+	result = plist_get_list(list, 0, null_list_ptr);
+	ASSERT_TRUE(result == false, "Expected result == false at index 6.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_LIST_NULL_INPUT_OUT_VALUE, "Expected pvars_errno == FAILURE_PLIST_GET_LIST_NULL_INPUT_OUT_VALUE at index 6.");
+	
+	/* Index 7 */
+	/* Deep copy check after other lists destroyed */
+	plist_get_list(list, 0, &value);
+	plist_destroy(list);
+	plist_destroy(list_child1);
+	plist_destroy(list_child2);
+	plist_destroy(list_child3);
+	char *extracted_from_value = NULL;
+	result = plist_get_str(value, 0, &extracted_from_value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 7.");
+	ASSERT_TRUE(value != NULL, "Expected result != NULL at index 7.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 6.");
+	
+	plist_destroy(value);
+	free(extracted_from_value);
+	
+	TEST_END();
+}
+
+
 
 /* ------------------------- */
 /* --- Test Suite Runner --- */
@@ -448,6 +770,11 @@ struct {
 	{"test_plist_add_list", test_plist_add_list},
 	{"test_plist_add_dict", test_plist_add_dict},
 	{"test_plist_get_str", test_plist_get_str},
+	{"test_plist_get_int", test_plist_get_int},
+	{"test_plist_get_long", test_plist_get_long},
+	{"test_plist_get_double", test_plist_get_double},
+	{"test_plist_get_float", test_plist_get_float},
+	{"test_plist_get_list", test_plist_get_list},
 	{NULL, NULL}
 };
 

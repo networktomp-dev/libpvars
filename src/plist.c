@@ -831,6 +831,11 @@ bool plist_get_list(const plist_t *list, size_t index, plist_t **out_value)
 		return false;
 	}
 	
+	if (out_value == NULL) {
+		pvars_errno = FAILURE_PLIST_GET_LIST_NULL_INPUT_OUT_VALUE;
+		return false;
+	}
+	
 	pvar_t *element = &list->elements[index];
 
 	if (element->type != PVAR_TYPE_LIST) {

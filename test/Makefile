@@ -28,7 +28,7 @@ all: test
 .PHONY: all test clean
 
 test: $(TEST_EXEC)
-	@echo "--- Running Test Suite: $(TEST_EXEC) ---"
+	@echo "--- Running Test Suite: $(TEST_EXEC) on $(UNAME_S) ---"
 	$(TEST_RUN)
 
 $(TEST_EXEC): $(TEST_SRC) $(LIB_NAME)
