@@ -5,7 +5,8 @@
 #include"pvars.h"
 #include"pvars_internal.h" 
 #include"plist_internal.h" 
-#include"pdict_internal.h" 
+#include"pdict_internal.h"
+#include"perrno.h"
 
 #define ASSERT_TRUE(condition, message) \
 	do { \
@@ -144,9 +145,9 @@ int test_plist_add_int(void)
 	TEST_END();
 }
 
-/* ----------------------- */
+/* ------------------------ */
 /* Test 4: plist_add_long() */
-/* ----------------------- */
+/* ------------------------ */
 int test_plist_add_long(void)
 {
 	plist_t *list = plist_create(1);
@@ -182,9 +183,9 @@ int test_plist_add_long(void)
 	TEST_END();
 }
 
-/* ----------------------- */
+/* -------------------------- */
 /* Test 5: plist_add_double() */
-/* ----------------------- */
+/* -------------------------- */
 int test_plist_add_double(void)
 {
 	plist_t *list = plist_create(1);
@@ -215,9 +216,9 @@ int test_plist_add_double(void)
 	TEST_END();
 }
 
-/* ----------------------- */
+/* ------------------------- */
 /* Test 6: plist_add_float() */
-/* ----------------------- */
+/* ------------------------- */
 int test_plist_add_float(void)
 {
 	plist_t *list = plist_create(1);
@@ -248,9 +249,9 @@ int test_plist_add_float(void)
 	TEST_END();
 }
 
-/* ----------------------- */
+/* ------------------------ */
 /* Test 7: plist_add_list() */
-/* ----------------------- */
+/* ------------------------ */
 int test_plist_add_list(void)
 {
 	plist_t *list_main = plist_create(1);
@@ -303,9 +304,9 @@ int test_plist_add_list(void)
 	TEST_END();
 }
 
-/* ----------------------- */
+/* ------------------------ */
 /* Test 8: plist_add_dict() */
-/* ----------------------- */
+/* ------------------------ */
 int test_plist_add_dict(void)
 {
 	plist_t *list = plist_create(1);
@@ -334,6 +335,80 @@ int test_plist_add_dict(void)
 	pdict_destroy(dict1);
 	pdict_destroy(dict2);
 	pdict_destroy(dict3);
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* ------------------------ */
+/* Test 9: plist_add_pvar() */
+/* ------------------------ */
+int test_plist_get_str(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_str(list, "libpvars");
+	plist_add_str(list, "test suite");
+	plist_add_int(list, 12);
+	plist_add_str(list, "API");
+	
+	char *string = NULL;
+	bool result;
+	
+	/* Index 0 */
+	result = plist_get_str(list, 0, &string);
+	fprintf(stderr, "pvars_errno is %d\n", pvars_errno);
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	ASSERT_TRUE(string != NULL, "Failed to get string at index 0.");
+	ASSERT_TRUE(strcmp(string, "libpvars") == 0, "Expected string to match at index 0.");
+	string[3] = '!'; // Since this is a deep copy, the following tests that the strings are not equal
+	ASSERT_TRUE(strcmp(string, "libpvars") != 0, "Expected string NOT to match at index 0.");
+	free(string);
+	
+	/* Index 1 */
+	result = plist_get_str(list, 1, &string);
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	ASSERT_TRUE(string != NULL, "Failed to get string at index 1.");
+	ASSERT_TRUE(strcmp(string, "test suite") == 0, "Expected string to match at index 1.");
+	string[3] = '!';
+	ASSERT_TRUE(strcmp(string, "test suite") != 0, "Expected string NOT to match at index 1.");
+	free(string);
+	
+	/* Index 2 */
+	/* Wrong type check */
+	result = plist_get_str(list, 2, &string);
+	ASSERT_TRUE(result == false, "Expected result == false at index 2.");
+	ASSERT_TRUE(pvars_errno != SUCCESS, "Expected pvars_errno != SUCCESS at index 2.");
+	
+	/* Index 3 */
+	result = plist_get_str(list, 3, &string);
+	ASSERT_TRUE(result == true, "Expected result == true at index 3.");
+	ASSERT_TRUE(string != NULL, "Failed to get string at index 3.");
+	ASSERT_TRUE(strcmp(string, "API") == 0, "Expected string to match at index 3.");
+	string[2] = '!';
+	ASSERT_TRUE(strcmp(string, "API") != 0, "Expected string NOT to match at index 3.");
+	free(string);
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	result = plist_get_str(list, 15, &string);
+	ASSERT_TRUE(result == false, "Expected result == false at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_STR_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_GET_STR_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	result = plist_get_str(null_list, 0, &string);
+	ASSERT_TRUE(result == false, "Expected result == false at index 5.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_STR_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_STR_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL out_value check  */
+	char **null_string_ptr = NULL;
+	result = plist_get_str(list, 0, null_string_ptr);
+	ASSERT_TRUE(result == false, "Expected result == false at index 6.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_STR_NULL_INPUT_OUT_VALUE, "Expected pvars_errno == FAILURE_PLIST_GET_STR_NULL_INPUT_OUT_VALUE at index 6.");
 	
 	plist_destroy(list);
 	
@@ -372,6 +447,7 @@ struct {
 	{"test_plist_add_float", test_plist_add_float},
 	{"test_plist_add_list", test_plist_add_list},
 	{"test_plist_add_dict", test_plist_add_dict},
+	{"test_plist_get_str", test_plist_get_str},
 	{NULL, NULL}
 };
 

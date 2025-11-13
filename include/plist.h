@@ -15,7 +15,7 @@ typedef struct plist_t plist_t;
 /* --- Public API Function Prototypes --- */
 
 /* plist_t setup and packdown*/
-plist_t *plist_create(long int initial_capacity);
+plist_t *plist_create(long int initial_capacity);				// Test 1
 plist_t *plist_copy(const plist_t *src);
 
 /* Cleanup functions */
@@ -31,17 +31,17 @@ size_t plist_get_capacity(const plist_t *list);
 pvar_type plist_get_type(const plist_t *list, size_t index);
 
 /* Core Add element functions (SINGLE ITEM ONLY) */
-void plist_add_str(plist_t *list, const char *value);
-void plist_add_int(plist_t *list, int value);
-void plist_add_double(plist_t *list, double value);
-void plist_add_long(plist_t *list, long value);
-void plist_add_float(plist_t *list, float value);
-void plist_add_list(plist_t *list, const plist_t *value);
-void plist_add_dict(plist_t *list, const pdict_t *value);
-void plist_add_pvar(plist_t *list, const pvar_t *value);
+void plist_add_str(plist_t *list, const char *value);				// Test 2
+void plist_add_int(plist_t *list, int value);					// Test 3
+void plist_add_double(plist_t *list, double value);				// Test 5
+void plist_add_long(plist_t *list, long value);					// Test 4
+void plist_add_float(plist_t *list, float value);				// Test 6
+void plist_add_list(plist_t *list, const plist_t *value);			// Test 7
+void plist_add_dict(plist_t *list, const pdict_t *value);			// Test 8
+void plist_add_pvar(plist_t *list, const pvar_t *value);			// No test yet
 
 /* String accessors */
-bool plist_get_str(const plist_t *list, size_t index, char **out_value);
+bool plist_get_str(const plist_t *list, size_t index, char **out_value);	// Test 9
 void plist_set_str(plist_t *list, size_t index, const char *new_string);
 
 /* Integer accessors */
