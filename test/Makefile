@@ -1,13 +1,23 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -I../include -std=c11
-VAL = valgrind
-VFLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	MEM_CHECKER_CMD = valgrind --leak-check=full --track-origins=yes
+endif
+ifeq ($(UNAME_S),Darwin)
+	MEM_CHECKER_CMD = leaks -atExit --
+endif
+ifndef MEM_CHECKER_CMD
+	MEM_CHECKER_CMD = ./
+	@echo "Warning: No OS-specific memory checker found. Running program directly."
+endif
+
 LIB_DIR = ..
 SRC_DIR = ../src
 
 TEST_SRC = test.c
 TEST_EXEC = ./test_pvars
-TEST_RUN = $(VAL) $(VFLAGS) $(TEST_EXEC)
+TEST_RUN = $(MEM_CHECKER_CMD) $(TEST_EXEC)
 
 LIB_NAME = $(LIB_DIR)/libpvars.a
 LIB_SRC_FILES = pdict.c plist.c perrno.c pvars.c
