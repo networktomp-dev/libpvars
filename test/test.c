@@ -749,6 +749,96 @@ int test_plist_get_list(void)
 	TEST_END();
 }
 
+/* ------------------------- */
+/* Test 15: plist_get_dict() */
+/* ------------------------- */
+int test_plist_get_dict(void)
+{
+	plist_t *list = plist_create(1);
+	
+	pdict_t *dict1 = pdict_create(1);
+	pdict_t *dict2 = pdict_create(1);
+	pdict_t *dict3 = pdict_create(1);
+	
+	pdict_add_int(dict1, "libpvars", 12);
+	pdict_add_str(dict1, "1.0.0.0", "latest version");
+	pdict_add_int(dict2, "API", 12);
+	pdict_add_long(dict2, "library", 64123);
+	pdict_add_float(dict3, "code", 12.5);
+	pdict_add_double(dict3, "developement", 65.645);
+	
+	plist_add_dict(list, dict1);
+	plist_add_dict(list, dict2);
+	plist_add_int(list, 16);
+	plist_add_dict(list, dict3);
+	
+	pdict_t *value = NULL;
+	bool result;
+	
+	/* Index 0 */
+	result = plist_get_dict(list, 0, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	ASSERT_TRUE(value != NULL, "Failed to get value at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	pdict_destroy(value);
+	
+	/* Index 1 */
+	result = plist_get_dict(list, 1, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	ASSERT_TRUE(value != NULL, "Failed to get value at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	pdict_destroy(value);
+	
+	/* Index 2 */
+	/* Wrong type check */
+	result = plist_get_dict(list, 2, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 2.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_DICT_WRONG_TYPE, "Expected pvars_errno == FAILURE_PLIST_GET_DICT_WRONG_TYPE at index 2.");
+	
+	/* Index 3 */
+	result = plist_get_dict(list, 3, &value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 3.");
+	ASSERT_TRUE(value != NULL, "Failed to get string at index 3.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 3.");
+	pdict_destroy(value);
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	result = plist_get_dict(list, 15, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_DICT_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_GET_DICT_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	result = plist_get_dict(null_list, 0, &value);
+	ASSERT_TRUE(result == false, "Expected result == false at index 5.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_DICT_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_GET_DICT_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL out_value check  */
+	pdict_t **null_dict_ptr = NULL;
+	result = plist_get_dict(list, 0, null_dict_ptr);
+	ASSERT_TRUE(result == false, "Expected result == false at index 6.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_GET_DICT_NULL_INPUT_OUT_VALUE, "Expected pvars_errno == FAILURE_PLIST_GET_DICT_NULL_INPUT_OUT_VALUE at index 6.");
+	
+	/* Index 7 */
+	/* Deep copy check after other lists destroyed */
+	plist_get_dict(list, 0, &value);
+	plist_destroy(list);
+	pdict_destroy(dict1);
+	pdict_destroy(dict2);
+	pdict_destroy(dict3);
+	int extracted_from_value;
+	result = pdict_get_int(value, "libpvars", &extracted_from_value);
+	ASSERT_TRUE(result == true, "Expected result == true at index 7.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 6.");
+	
+	pdict_destroy(value);
+	
+	TEST_END();
+}
+
 
 
 /* ------------------------- */
@@ -775,6 +865,7 @@ struct {
 	{"test_plist_get_double", test_plist_get_double},
 	{"test_plist_get_float", test_plist_get_float},
 	{"test_plist_get_list", test_plist_get_list},
+	{"test_plist_get_dict", test_plist_get_dict},
 	{NULL, NULL}
 };
 

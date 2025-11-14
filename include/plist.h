@@ -61,11 +61,11 @@ bool plist_get_float(const plist_t *list, size_t index, float *out_value);	// Te
 void plist_set_float(plist_t *list, size_t index, float new_value);
 
 /* List accessors */
-bool plist_get_list(const plist_t *list, size_t index, plist_t **out_value);
+bool plist_get_list(const plist_t *list, size_t index, plist_t **out_value);	// Test 14
 void plist_set_list(plist_t *list, size_t index, const plist_t *new_list);
 
 /* Dict accessors */
-bool plist_get_dict(const plist_t *list, size_t index, pdict_t **out_value);
+bool plist_get_dict(const plist_t *list, size_t index, pdict_t **out_value);	// Test 14
 void plist_set_dict(plist_t *list, size_t index, const pdict_t *new_dict);
 
 /* Remove element */
