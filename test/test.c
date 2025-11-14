@@ -839,6 +839,257 @@ int test_plist_get_dict(void)
 	TEST_END();
 }
 
+/* ------------------------ */
+/* Test 16: plist_set_str() */
+/* ------------------------ */
+int test_plist_set_str(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_str(list, "libpvars");
+	plist_add_str(list, "test suite");
+	plist_add_int(list, 12);
+	plist_add_str(list, "API");
+	
+	/* Index 0 */
+	plist_set_str(list, 0, "low-level");
+	ASSERT_TRUE(strcmp(list->elements[0].data.s, "low-level") == 0, "Expected strings to match at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	
+	/* Index 1 */
+	plist_set_str(list, 1, "network");
+	ASSERT_TRUE(strcmp(list->elements[1].data.s, "network") == 0, "Expected strings to match at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	
+	/* Index 2 */
+	/* Replacing different type */
+	plist_set_str(list, 2, "compiled");
+	ASSERT_TRUE(strcmp(list->elements[2].data.s, "compiled") == 0, "Expected strings to match at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	
+	/* Index 3 */
+	plist_set_str(list, 3, "assembly");
+	ASSERT_TRUE(strcmp(list->elements[3].data.s, "assembly") == 0, "Expected strings to match at index 3.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	plist_set_str(list, 15, "garbage value");;
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_STR_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_SET_STR_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	plist_set_str(null_list, 0, "boolean");
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_STR_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_STR_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL string check  */
+	char *null_string_ptr = NULL;
+	plist_set_str(list, 0, null_string_ptr);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_STR_NULL_STRING_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_STR_NULL_INPUT_OUT_VALUE at index 6.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* ------------------------ */
+/* Test 17: plist_set_int() */
+/* ------------------------ */
+int test_plist_set_int(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_int(list, 12);
+	plist_add_int(list, 1024);
+	plist_add_str(list, "API");
+	plist_add_int(list, 128);
+	
+	/* Index 0 */
+	plist_set_int(list, 0, 2048);
+	ASSERT_TRUE(list->elements[0].data.i == 2048, "Expected ints to match at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	
+	/* Index 1 */
+	plist_set_int(list, 1, 4096);
+	ASSERT_TRUE(list->elements[1].data.i == 4096, "Expected ints to match at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	
+	/* Index 2 */
+	/* Replacing different type */
+	plist_set_int(list, 2, 8192);
+	ASSERT_TRUE(list->elements[2].data.i == 8192, "Expected ints to match at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	
+	/* Index 3 */
+	plist_set_int(list, 3, 16384);
+	ASSERT_TRUE(list->elements[3].data.i == 16384, "Expected ints to match at index 3.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	plist_set_int(list, 15, 87);;
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_INT_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_SET_INT_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	plist_set_int(null_list, 0, 91);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_INT_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_INT_NULL_INPUT at index 5.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* ------------------------- */
+/* Test 18: plist_set_long() */
+/* ------------------------- */
+int test_plist_set_long(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_long(list, 12);
+	plist_add_long(list, 1024);
+	plist_add_str(list, "API");
+	plist_add_long(list, 128);
+	
+	/* Index 0 */
+	plist_set_long(list, 0, 2048);
+	ASSERT_TRUE(list->elements[0].data.l == 2048, "Expected longs to match at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	
+	/* Index 1 */
+	plist_set_long(list, 1, 4096);
+	ASSERT_TRUE(list->elements[1].data.l == 4096, "Expected longs to match at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	
+	/* Index 2 */
+	/* Replacing different type */
+	plist_set_long(list, 2, 8192);
+	ASSERT_TRUE(list->elements[2].data.l == 8192, "Expected longs to match at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	
+	/* Index 3 */
+	plist_set_long(list, 3, 16384);
+	ASSERT_TRUE(list->elements[3].data.l == 16384, "Expected longs to match at index 3.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	plist_set_long(list, 15, 87);;
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_LONG_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_SET_LONG_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	plist_set_long(null_list, 0, 91);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_LONG_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_LONG_NULL_INPUT at index 5.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* --------------------------- */
+/* Test 19: plist_set_double() */
+/* --------------------------- */
+int test_plist_set_double(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_double(list, 12.1);
+	plist_add_double(list, 1024.3);
+	plist_add_str(list, "API");
+	plist_add_double(list, 128.7);
+	
+	/* Index 0 */
+	plist_set_double(list, 0, 2048.7);
+	ASSERT_TRUE(fabs(list->elements[0].data.d - 2048.7) < (DBL_EPSILON * fmax(fabs(list->elements[0].data.d), fabs(2048.7))), "Expected doubles to match at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	
+	/* Index 1 */
+	plist_set_double(list, 1, 4096.5);
+	ASSERT_TRUE(fabs(list->elements[1].data.d - 4096.5) < (DBL_EPSILON * fmax(fabs(list->elements[0].data.d), fabs(4096.5))), "Expected doubles to match at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	
+	/* Index 2 */
+	/* Replacing different type */
+	plist_set_double(list, 2, 8192.1);
+	ASSERT_TRUE(fabs(list->elements[2].data.d - 8192.1) < (DBL_EPSILON * fmax(fabs(list->elements[0].data.d), fabs(8192.1))), "Expected doubles to match at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	
+	/* Index 3 */
+	plist_set_double(list, 3, 16384.3);
+	ASSERT_TRUE(fabs(list->elements[3].data.d - 16384.3) < (DBL_EPSILON * fmax(fabs(list->elements[0].data.d), fabs(16384.3))), "Expected doubles to match at index 3.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	plist_set_double(list, 15, 87.6);;
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_DOUBLE_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_SET_DOUBLE_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	plist_set_double(null_list, 0, 91.8);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_DOUBLE_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_DOUBLE_NULL_INPUT at index 5.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* -------------------------- */
+/* Test 20: plist_set_float() */
+/* -------------------------- */
+int test_plist_set_float(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_float(list, 12.1);
+	plist_add_float(list, 1024.3);
+	plist_add_str(list, "API");
+	plist_add_float(list, 128.7);
+	
+	/* Index 0 */
+	plist_set_float(list, 0, 2048.7);
+	ASSERT_TRUE(fabsf(list->elements[0].data.f - 2048.7f) < FLT_EPSILON, "Expected floats to match at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	
+	/* Index 1 */
+	plist_set_float(list, 1, 4096.5);
+	ASSERT_TRUE(fabsf(list->elements[1].data.f - 4096.5f) < FLT_EPSILON, "Expected floats to match at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	
+	/* Index 2 */
+	/* Replacing different type */
+	plist_set_float(list, 2, 8192.1);
+	ASSERT_TRUE(fabsf(list->elements[2].data.f - 8192.1f) < FLT_EPSILON, "Expected floats to match at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	
+	/* Index 3 */
+	plist_set_float(list, 3, 16384.3);
+	ASSERT_TRUE(fabsf(list->elements[3].data.f - 16384.3f) < FLT_EPSILON, "Expected floats to match at index 3.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 3.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	plist_set_float(list, 15, 87.6);;
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_FLOAT_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_SET_FLOAT_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	plist_set_float(null_list, 0, 91.8);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_FLOAT_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_FLOAT_NULL_INPUT at index 5.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
 
 
 /* ------------------------- */
@@ -866,6 +1117,11 @@ struct {
 	{"test_plist_get_float", test_plist_get_float},
 	{"test_plist_get_list", test_plist_get_list},
 	{"test_plist_get_dict", test_plist_get_dict},
+	{"test_plist_set_str", test_plist_set_str},
+	{"test_plist_set_int", test_plist_set_int},
+	{"test_plist_set_long", test_plist_set_long},
+	{"test_plist_set_double", test_plist_set_double},
+	{"test_plist_set_float", test_plist_set_float},
 	{NULL, NULL}
 };
 

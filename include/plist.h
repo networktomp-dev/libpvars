@@ -42,11 +42,11 @@ void plist_add_pvar(plist_t *list, const pvar_t *value);
 
 /* String accessors */
 bool plist_get_str(const plist_t *list, size_t index, char **out_value);	// Test 9
-void plist_set_str(plist_t *list, size_t index, const char *new_string);
+void plist_set_str(plist_t *list, size_t index, const char *new_string);	// Test 16
 
 /* Integer accessors */
 bool plist_get_int(const plist_t *list, size_t index, int *out_value);		// Test 10
-void plist_set_int(plist_t *list, size_t index, int new_value);
+void plist_set_int(plist_t *list, size_t index, int new_value);			// Test 17
 
 /* Double accessors */
 bool plist_get_double(const plist_t *list, size_t index, double *out_value);	// Test 12
@@ -54,7 +54,7 @@ void plist_set_double(plist_t *list, size_t index, double new_value);
 
 /* Long accessors */
 bool plist_get_long(const plist_t *list, size_t index, long *out_value);	// Test 11
-void plist_set_long(plist_t *list, size_t index, long new_value);
+void plist_set_long(plist_t *list, size_t index, long new_value);		// Test 18
 
 /* Float accessors */
 bool plist_get_float(const plist_t *list, size_t index, float *out_value);	// Test 13
@@ -65,7 +65,7 @@ bool plist_get_list(const plist_t *list, size_t index, plist_t **out_value);	// 
 void plist_set_list(plist_t *list, size_t index, const plist_t *new_list);
 
 /* Dict accessors */
-bool plist_get_dict(const plist_t *list, size_t index, pdict_t **out_value);	// Test 14
+bool plist_get_dict(const plist_t *list, size_t index, pdict_t **out_value);	// Test 15
 void plist_set_dict(plist_t *list, size_t index, const pdict_t *new_dict);
 
 /* Remove element */
