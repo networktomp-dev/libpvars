@@ -940,7 +940,7 @@ void plist_set_str(plist_t *list, size_t index, const char *new_string)
 	}
 
 	element->data.s = current_str;
-	element->type = PVAR_TYPE_STRING; // Ensures the type is set correctly
+	element->type = PVAR_TYPE_STRING;
 }
 
 /**
@@ -972,7 +972,7 @@ void plist_set_int(plist_t *list, size_t index, int new_value)
 	pvar_destroy_internal(element);
 
 	element->data.i = new_value;
-	element->type = PVAR_TYPE_INT; // Ensures the type is set correctly
+	element->type = PVAR_TYPE_INT;
 }
 
 /**
@@ -1004,7 +1004,7 @@ void plist_set_double(plist_t *list, size_t index, double new_value)
 	pvar_destroy_internal(element);
 
 	element->data.d = new_value;
-	element->type = PVAR_TYPE_DOUBLE; // Ensures the type is set correctly
+	element->type = PVAR_TYPE_DOUBLE;
 }
 
 /**
@@ -1036,7 +1036,7 @@ void plist_set_long(plist_t *list, size_t index, long new_value)
 	pvar_destroy_internal(element);
 
 	element->data.l = new_value;
-	element->type = PVAR_TYPE_LONG; // Ensures the type is set correctly
+	element->type = PVAR_TYPE_LONG;
 }
 
 /**
@@ -1068,7 +1068,7 @@ void plist_set_float(plist_t *list, size_t index, float new_value)
 	pvar_destroy_internal(element);
 
 	element->data.f = new_value;
-	element->type = PVAR_TYPE_FLOAT; // Ensures the type is set correctly
+	element->type = PVAR_TYPE_FLOAT;
 }
 
 /**
@@ -1112,7 +1112,6 @@ void plist_set_list(plist_t *list, size_t index, const plist_t *new_list)
 
 	element->data.ls = deep_list;
 	element->type = PVAR_TYPE_LIST;
-	; // Ensures the type is set correctly
 }
 
 /**

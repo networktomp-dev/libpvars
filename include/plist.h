@@ -26,9 +26,9 @@ void plist_destroy(plist_t *list);
 void plist_print(const plist_t *list);
 
 /* plist_t meta data accessors */
-size_t plist_get_size(const plist_t *list);
-size_t plist_get_capacity(const plist_t *list);
-pvar_type plist_get_type(const plist_t *list, size_t index);
+size_t plist_get_size(const plist_t *list);					// Test 23
+size_t plist_get_capacity(const plist_t *list);					// Test 23
+pvar_type plist_get_type(const plist_t *list, size_t index);			// Test 23
 
 /* Core Add element functions (SINGLE ITEM ONLY) */
 void plist_add_str(plist_t *list, const char *value);				// Test 2
@@ -50,7 +50,7 @@ void plist_set_int(plist_t *list, size_t index, int new_value);			// Test 17
 
 /* Double accessors */
 bool plist_get_double(const plist_t *list, size_t index, double *out_value);	// Test 12
-void plist_set_double(plist_t *list, size_t index, double new_value);
+void plist_set_double(plist_t *list, size_t index, double new_value);		// Test 19
 
 /* Long accessors */
 bool plist_get_long(const plist_t *list, size_t index, long *out_value);	// Test 11
@@ -58,18 +58,18 @@ void plist_set_long(plist_t *list, size_t index, long new_value);		// Test 18
 
 /* Float accessors */
 bool plist_get_float(const plist_t *list, size_t index, float *out_value);	// Test 13
-void plist_set_float(plist_t *list, size_t index, float new_value);
+void plist_set_float(plist_t *list, size_t index, float new_value);		// Test 20
 
 /* List accessors */
 bool plist_get_list(const plist_t *list, size_t index, plist_t **out_value);	// Test 14
-void plist_set_list(plist_t *list, size_t index, const plist_t *new_list);
+void plist_set_list(plist_t *list, size_t index, const plist_t *new_list);	// Test 21
 
 /* Dict accessors */
 bool plist_get_dict(const plist_t *list, size_t index, pdict_t **out_value);	// Test 15
-void plist_set_dict(plist_t *list, size_t index, const pdict_t *new_dict);
+void plist_set_dict(plist_t *list, size_t index, const pdict_t *new_dict);	// Test 22
 
 /* Remove element */
-void plist_remove(plist_t *list, size_t index);
+void plist_remove(plist_t *list, size_t index);					// Test 23
 
 /* Functions that query list */
 bool plist_contains(const plist_t *list, pvar_t *element_to_find);

@@ -1090,6 +1090,279 @@ int test_plist_set_float(void)
 	TEST_END();
 }
 
+/* ------------------------- */
+/* Test 21: plist_set_list() */
+/* ------------------------- */
+int test_plist_set_list(void)
+{
+	plist_t *list = plist_create(1);
+	plist_t *list_child1 = plist_create(1);
+	plist_t *list_child2 = plist_create(1);
+	plist_t *list_child3 = plist_create(1);
+	plist_t *list_child4 = plist_create(1);
+	plist_t *list_child5 = plist_create(1);
+	plist_t *list_child6 = plist_create(1);
+	
+	plist_add_str(list_child1, "libpvars");
+	plist_add_str(list_child1, "1.0.0.0");
+	plist_add_long(list_child2, 12);
+	plist_add_long(list_child2, 64123);
+	plist_add_double(list_child3, 12.5);
+	plist_add_double(list_child3, 65.645);
+	plist_add_int(list_child4, 45);
+	plist_add_int(list_child4, 72);
+	plist_add_str(list_child5, "API");
+	plist_add_str(list_child5, "C");
+	plist_add_int(list_child6, 109);
+	plist_add_int(list_child6, 108);
+	
+	plist_add_list(list, list_child1);
+	plist_add_list(list, list_child2);
+	plist_add_int(list, 16);
+	plist_add_list(list, list_child3);
+	
+	plist_destroy(list_child1);
+	plist_destroy(list_child2);
+	plist_destroy(list_child3);
+	
+	/* Index 0 */
+	plist_set_list(list, 0, list_child4);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	plist_destroy(list_child4);
+	plist_t *value = NULL;
+	plist_get_list(list, 0, &value);
+	ASSERT_TRUE(value->elements[0].data.i == 45, "Expected ints to match at index 0.");
+	ASSERT_TRUE(value->elements[1].data.i == 72, "Expected ints to match at index 0.");
+	plist_destroy(value);
+	
+	/* Index 1 */
+	plist_set_list(list, 1, list_child5);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	plist_destroy(list_child5);
+	value = NULL;
+	plist_get_list(list, 1, &value);
+	ASSERT_TRUE(strcmp(value->elements[0].data.s, "API") == 0, "Expected strings to match at index 1.");
+	ASSERT_TRUE(strcmp(value->elements[1].data.s, "C") == 0, "Expected strings to match at index 1.");
+	plist_destroy(value);
+	
+	/* Index 2 */
+	plist_set_list(list, 2, list_child6);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	plist_destroy(list_child6);
+	value = NULL;
+	plist_get_list(list, 2, &value);
+	ASSERT_TRUE(value->elements[0].data.i == 109, "Expected ints to match at index 2.");
+	ASSERT_TRUE(value->elements[1].data.i == 108, "Expected ints to match at index 2.");
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	plist_set_list(list, 15, value);;
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_LIST_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_SET_LIST_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* NULL list check  */
+	plist_t *null_list = NULL;
+	plist_set_list(null_list, 0, value);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_LIST_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_LIST_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* NULL string check  */
+	plist_t *null_list_ptr = NULL;
+	plist_set_list(list, 0, null_list_ptr);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_LIST_NULL_LIST_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_LIST_NULL_INPUT at index 6.");
+	
+	plist_destroy(list);
+	plist_destroy(value);
+	
+	TEST_END();
+}
+
+/* ------------------------- */
+/* Test 22: plist_set_dict() */
+/* ------------------------- */
+int test_plist_set_dict(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_str(list, "libpvars");
+	plist_add_int(list, 5423);
+	plist_add_double(list, 7809.3);
+	plist_add_float(list, 4.5);
+	
+	pdict_t *dict1 = pdict_create(1);
+	pdict_t *dict2 = pdict_create(1);
+	pdict_t *dict3 = pdict_create(1);
+	pdict_t *dict4 = pdict_create(1);
+	
+	pdict_add_int(dict1, "key", 1);
+	pdict_add_int(dict2, "dictionary", 34);
+	pdict_add_int(dict3, "value", 654);
+	
+	pdict_t *value = NULL;
+	int int_val;
+	
+	/* Index 0 */
+	plist_set_dict(list, 0, dict1);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	pdict_destroy(dict1);
+	plist_get_dict(list, 0, &value);
+	ASSERT_TRUE(pdict_contains(value, "key") == true, "Expected value to contain \"key\" at index 0.");
+	pdict_get_int(value, "key", &int_val);
+	ASSERT_TRUE(int_val == 1, "Expected int_val == 1 at index 0.");
+	pdict_destroy(value);
+	
+	/* Index 1 */
+	plist_set_dict(list, 1, dict2);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	pdict_destroy(dict2);
+	plist_get_dict(list, 1, &value);
+	ASSERT_TRUE(pdict_contains(value, "dictionary") == true, "Expected value to contain \"dictionary\" at index 1.");
+	pdict_get_int(value, "dictionary", &int_val);
+	ASSERT_TRUE(int_val == 34, "Expected int_val == 34 at index 1.");
+	pdict_destroy(value);
+	
+	/* Index 2 */
+	plist_set_dict(list, 2, dict3);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	pdict_destroy(dict3);
+	plist_get_dict(list, 2, &value);
+	ASSERT_TRUE(pdict_contains(value, "value") == true, "Expected value to contain \"value\" at index 2.");
+	pdict_get_int(value, "value", &int_val);
+	ASSERT_TRUE(int_val == 654, "Expected int_val == 654 at index 2.");
+	pdict_destroy(value);
+	
+	/* Index 4 */
+	/* Out of bounds check */
+	plist_set_dict(list, 15, dict4);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_DICT_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_SET_DICT_OUT_OF_BOUNDS at index 4.");
+	
+	/* Index 5 */
+	/* Null list check */
+	plist_t *null_list = NULL;
+	plist_set_dict(null_list, 0, dict4);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_DICT_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_DICT_NULL_INPUT at index 5.");
+	pdict_destroy(dict4);
+	
+	/* Index 6 */
+	/* Null dict check */
+	pdict_t *null_dict = NULL;
+	plist_set_dict(list, 0, null_dict);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_SET_DICT_NULL_DICT_INPUT, "Expected pvars_errno == FAILURE_PLIST_SET_DICT_NULL_DICT_INPUT at index 6.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* --------------------------------------------------------------------------------- */
+/* Test 23: plist_get_size(), plist_get_capacity(), plist_get_type(), plist_remove() */
+/* --------------------------------------------------------------------------------- */
+int test_plist_get_size_capacity_type_remove(void)
+{
+	size_t size;
+	size_t capacity;
+	pvar_type type;
+	
+	plist_t *list = plist_create(1);
+	
+	/* Index 0 */
+	size = plist_get_size(list);
+	ASSERT_TRUE(size == 0, "Expected size == 0 at index 0.");
+	capacity = plist_get_capacity(list);
+	ASSERT_TRUE(capacity == 1, "Expected capacity == 1 at index 0.");
+	type = plist_get_type(list, 0);
+	ASSERT_TRUE(type == PVAR_TYPE_NONE, "Expected type == PVAR_TYPE_NONE at index 0.");
+	plist_remove(list, 0);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_REMOVE_OUT_OF_BOUNDS, "Expected pvars_errno == FAILURE_PLIST_REMOVE_OUT_OF_BOUNDS at index 0.");
+	
+	/* Index 1 */
+	for (size_t i = 0; i < 100; i++) {
+		plist_add_int(list, i);
+	}
+	size = plist_get_size(list);
+	ASSERT_TRUE(size == 100, "Expected size == 100 at index 1.");
+	capacity = plist_get_capacity(list);
+	ASSERT_TRUE(capacity == 128, "Expected capacity == 128 at index 1.");
+	type = plist_get_type(list, 99);
+	ASSERT_TRUE(type == PVAR_TYPE_INT, "Expected type == PVAR_TYPE_INT at index 1.");
+	plist_remove(list, 0);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	
+	/* Index 2 */
+	plist_set_float(list, 98, 6.7);
+	for (size_t i = 98; i >= 50; i--) {
+		plist_remove(list, 20);
+	}
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	size = plist_get_size(list);
+	ASSERT_TRUE(size == 50, "Expected size == 100 at index 1.");
+	capacity = plist_get_capacity(list);
+	ASSERT_TRUE(capacity == 128, "Expected capacity == 128 at index 1.");
+	type = plist_get_type(list, 49);
+	ASSERT_TRUE(type == PVAR_TYPE_FLOAT, "Expected type == PVAR_TYPE_INT at index 1.");
+	
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* ------------------------------------ */
+/* Test 24: plist_empty(), plist_copy() */
+/* ------------------------------------ */
+int test_plist_empty_copy(void)
+{
+	plist_t *list = plist_create(1);
+	
+	for (size_t i = 0; i < 1000; i++) {
+		plist_add_str(list, "string");
+		plist_add_int(list, 1);
+		plist_add_double(list, 56234);
+	}
+
+	size_t size;
+	size_t capacity;
+	pvar_type type;
+	size_t size_copy;
+	size_t capacity_copy;
+	pvar_type type_copy;
+	
+	/* Index 0 */
+	plist_t *list_copy = plist_copy(list);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	size = plist_get_size(list);
+	size_copy = plist_get_size(list_copy);
+	ASSERT_TRUE(size == size_copy, "Expected size == size_copy at index 0.");
+	capacity = plist_get_capacity(list);
+	capacity_copy = plist_get_capacity(list_copy);
+	ASSERT_TRUE(capacity == capacity_copy, "Expected capacity == capacity_copy at index 0.");
+	type = plist_get_type(list, 0);
+	type_copy = plist_get_type(list_copy, 0);
+	ASSERT_TRUE(type == type_copy, "Expected type == type_copy at index 0.");
+	
+	/* Index 1*/
+	plist_empty(list);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	size = plist_get_size(list);
+	size_copy = plist_get_size(list_copy);
+	ASSERT_TRUE(size != size_copy, "Expected size != size_copy at index 1.");
+	capacity = plist_get_capacity(list);
+	capacity_copy = plist_get_capacity(list_copy);
+	ASSERT_TRUE(capacity == capacity_copy, "Expected capacity == capacity_copy at index 1."); /* Capacity should remain unchanged */
+	type = plist_get_type(list, 0);
+	type_copy = plist_get_type(list_copy, 0);
+	ASSERT_TRUE(type != type_copy, "Expected type != type_copy at index 1.");
+	
+	/* Index 2 */
+	/* Tests deep copy */
+	plist_destroy(list);
+	int value;
+	plist_get_int(list_copy, 1000, &value);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	plist_destroy(list_copy);
+	
+	TEST_END();
+}
 
 
 /* ------------------------- */
@@ -1122,6 +1395,10 @@ struct {
 	{"test_plist_set_long", test_plist_set_long},
 	{"test_plist_set_double", test_plist_set_double},
 	{"test_plist_set_float", test_plist_set_float},
+	{"test_plist_set_list", test_plist_set_list},
+	{"test_plist_set_dict", test_plist_set_dict},
+	{"test_plist_get_size_capacity_type_remove", test_plist_get_size_capacity_type_remove},
+	{"test_plist_empty_copy", test_plist_empty_copy},
 	{NULL, NULL}
 };
 
