@@ -1166,6 +1166,8 @@ void plist_set_dict(plist_t *list, size_t index, const pdict_t *new_dict)
  */
 bool plist_contains(const plist_t *list, pvar_t *element_to_find)
 {
+	pvars_errno = PERRNO_CLEAR;
+	
 	if (list == NULL || element_to_find == NULL) {
 		pvars_errno = FAILURE_PLIST_CONTAINS_NULL_INPUT;
 		return false;

@@ -16,10 +16,10 @@ typedef struct plist_t plist_t;
 
 /* plist_t setup and packdown*/
 plist_t *plist_create(long int initial_capacity);				// Test 1
-plist_t *plist_copy(const plist_t *src);
+plist_t *plist_copy(const plist_t *src);					// Test 24
 
 /* Cleanup functions */
-void plist_empty(plist_t *list);
+void plist_empty(plist_t *list);						// Test 24
 void plist_destroy(plist_t *list);
 
 /* Functions that act on plist_t variables */
@@ -72,7 +72,7 @@ void plist_set_dict(plist_t *list, size_t index, const pdict_t *new_dict);	// Te
 void plist_remove(plist_t *list, size_t index);					// Test 23
 
 /* Functions that query list */
-bool plist_contains(const plist_t *list, pvar_t *element_to_find);
+bool plist_contains(const plist_t *list, pvar_t *element_to_find);		// Test 25
 
 
 #endif /* PLIST_H */

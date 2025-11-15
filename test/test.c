@@ -1,6 +1,9 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include<stdio.h>
 #include<math.h>
 #include<float.h>
+#include<string.h>
 
 #include"pvars.h"
 #include"pvars_internal.h" 
@@ -29,7 +32,7 @@ int test_plist_create(void)
 	/* Create and destroy the same list several times */
 	/* Index 0 */
 	plist_t *list = plist_create(0);
-	ASSERT_TRUE(list == NULL, "Did not get the expected NULL.");
+	ASSERT_TRUE(list == NULL, "Expected list == NULL at index 0.");
 	
 	/* Index 1 */
 	list = plist_create(1);
@@ -211,6 +214,11 @@ int test_plist_add_double(void)
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2");
 	ASSERT_TRUE(fabs(list->elements[2].data.d - (-9999.3)) < (DBL_EPSILON * fmax(fabs(list->elements[2].data.d), fabs(-9999.3))), "expected double to equal -9999.3");
 	
+	/* Index 3 */
+	plist_t *null_list = NULL;
+	plist_add_double(null_list, 23567.4);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_ADD_DOUBLE_NULL_INPUT, "Expected FAILURE_PLIST_ADD_DOUBLE_NULL_INPUT at index 3.");
+	
 	plist_destroy(list);
 	
 	TEST_END();
@@ -243,6 +251,11 @@ int test_plist_add_float(void)
 	ASSERT_TRUE(list->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2");
 	ASSERT_TRUE(fabsf(list->elements[2].data.f - (-9999.3f)) < FLT_EPSILON, "expected float to equal -9999.3");
+	
+	/* Index 3 */
+	plist_t *null_list = NULL;
+	plist_add_float(null_list, 2356.7);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_ADD_FLOAT_NULL_INPUT, "Expected FAILURE_PLIST_ADD_FLOAT_NULL_INPUT at index 3.");
 	
 	plist_destroy(list);
 	
@@ -295,6 +308,15 @@ int test_plist_add_list(void)
 	ASSERT_TRUE(list_main->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
 	
+	/* Index 3 */
+	plist_t *null_list = NULL;
+	plist_add_list(null_list, list_child1);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_ADD_LIST_NULL_INPUT, "Expected FAILURE_PLIST_ADD_LIST_NULL_INPUT at index 3.");
+	
+	/* Index 4 */
+	plist_add_list(list_main, null_list);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_ADD_LIST_NULL_LIST_INPUT, "Expected FAILURE_PLIST_ADD_LIST_NULL_LIST_INPUT at index 4.");
+	
 	plist_destroy(list_child1);
 	plist_destroy(list_child2);
 	plist_destroy(list_child3);
@@ -331,6 +353,16 @@ int test_plist_add_dict(void)
 	ASSERT_TRUE(list->count == 3, "Expected a count of 3 at index 2.");
 	ASSERT_TRUE(list->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
+	
+	/* Index 3 */
+	plist_t *null_list = NULL;
+	plist_add_dict(null_list, dict1);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_ADD_DICT_NULL_INPUT, "Expected FAILURE_PLIST_ADD_DICT_NULL_INPUT at index 3.");
+	
+	/* Index 4 */
+	pdict_t *null_dict = NULL;
+	plist_add_dict(list, null_dict);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_ADD_DICT_NULL_DICT_INPUT, "Expected FAILURE_PLIST_ADD_DICT_NULL_DICT_INPUT at index 4.");
 
 	pdict_destroy(dict1);
 	pdict_destroy(dict2);
@@ -1364,6 +1396,137 @@ int test_plist_empty_copy(void)
 	TEST_END();
 }
 
+/* ------------------------- */
+/* Test 25: plist_contains() */
+/* ------------------------- */
+int test_plist_contains(void)
+{
+	plist_t *list = plist_create(1);
+	
+	plist_add_str(list, "libpvars");
+	plist_add_int(list, 432);
+	plist_add_float(list, 17.8);
+	
+	pvar_t string;
+	string.type = PVAR_TYPE_STRING;
+	string.data.s = strdup("libpvars");
+	pvar_t integer;
+	integer.type = PVAR_TYPE_INT;
+	integer.data.i = 432;
+	pvar_t flt;
+	flt.type = PVAR_TYPE_FLOAT;
+	flt.data.f = 17.8f;
+	pvar_t dbl;
+	dbl.type = PVAR_TYPE_DOUBLE;
+	dbl.data.d = 387.55;
+	pvar_t lng;
+	lng.type = PVAR_TYPE_LONG;
+	lng.data.l = 46700;
+	
+	bool result;
+	
+	/* Index 0 */
+	result = plist_contains(list, &string);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	pvar_destroy_internal(&string);
+	
+	/* Index 1 */
+	result = plist_contains(list, &integer);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	
+	/* Index 2 */
+	result = plist_contains(list, &flt);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	ASSERT_TRUE(result == true, "Expected result == true at index 2.");
+	
+	/* Index 3 */
+	result = plist_contains(list, &dbl);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 3.");
+	ASSERT_TRUE(result == false, "Expected result == false at index 3.");
+	
+	/* Index 4 */
+	result = plist_contains(list, &lng);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 4.");
+	ASSERT_TRUE(result == false, "Expected result == false at index 4.");
+	
+	/* Index 5 */
+	/* Check NULL list input */
+	plist_t *null_list = NULL;
+	result = plist_contains(null_list, &integer);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_CONTAINS_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_CONTAINS_NULL_INPUT at index 5.");
+	ASSERT_TRUE(result == false, "Expected result == false at index 5.");
+	
+	/* Index 6 */
+	/* Check NULL element input */
+	pvar_t *null_element = NULL;
+	result = plist_contains(list, null_element);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_CONTAINS_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_CONTAINS_NULL_INPUT at index 6.");
+	ASSERT_TRUE(result == false, "Expected result == false at index 6.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
+/* ------------------------- */
+/* Test 26: plist_add_pvar() */
+/* ------------------------- */
+int test_plist_add_pvar(void)
+{
+	plist_t *list = plist_create(1);
+	
+	pvar_t string;
+	string.type = PVAR_TYPE_STRING;
+	string.data.s = strdup("libpvars");
+	pvar_t integer;
+	integer.type = PVAR_TYPE_INT;
+	integer.data.i = 432;
+	pvar_t flt;
+	flt.type = PVAR_TYPE_FLOAT;
+	flt.data.f = 17.8f;
+	
+	bool result;
+	
+	/* Index 0 */
+	plist_add_pvar(list, &string);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 0.");
+	result = plist_contains(list, &string);
+	ASSERT_TRUE(result == true, "Expected result == true at index 0.");
+	pvar_destroy_internal(&string);
+	
+	/* Index 1 */
+	plist_add_pvar(list, &integer);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	result = plist_contains(list, &integer);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 1.");
+	ASSERT_TRUE(result == true, "Expected result == true at index 1.");
+	
+	/* Index 2 */
+	plist_add_pvar(list, &flt);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	result = plist_contains(list, &flt);
+	ASSERT_TRUE(pvars_errno == SUCCESS, "Expected pvars_errno == SUCCESS at index 2.");
+	ASSERT_TRUE(result == true, "Expected result == true at index 2.");
+	
+	/* Index 5 */
+	/* Check NULL list input */
+	plist_t *null_list = NULL;
+	plist_add_pvar(null_list, &integer);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_ADD_PVAR_NULL_INPUT, "Expected pvars_errno == FAILURE_PLIST_ADD_PVAR_NULL_INPUT at index 5.");
+	
+	/* Index 6 */
+	/* Check NULL element input */
+	pvar_t *null_element = NULL;
+	plist_add_pvar(list, null_element);
+	ASSERT_TRUE(pvars_errno == FAILURE_PLIST_ADD_PVAR_NULL_PVAR_INPUT, "Expected pvars_errno == FFAILURE_PLIST_ADD_PVAR_NULL_PVAR_INPUT at index 6.");
+	
+	plist_destroy(list);
+	
+	TEST_END();
+}
+
 
 /* ------------------------- */
 /* --- Test Suite Runner --- */
@@ -1399,6 +1562,8 @@ struct {
 	{"test_plist_set_dict", test_plist_set_dict},
 	{"test_plist_get_size_capacity_type_remove", test_plist_get_size_capacity_type_remove},
 	{"test_plist_empty_copy", test_plist_empty_copy},
+	{"test_plist_contains", test_plist_contains},
+	{"test_plist_add_pvar", test_plist_add_pvar},
 	{NULL, NULL}
 };
 
