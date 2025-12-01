@@ -1570,7 +1570,8 @@ struct {
 /* ------------ */
 /* --- Main --- */
 /* ------------ */
-int main() {
+int main()
+{
 	int total_tests = 0;
 	int failed_tests = 0;
 
