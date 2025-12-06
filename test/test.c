@@ -1527,6 +1527,45 @@ int test_plist_add_pvar(void)
 	TEST_END();
 }
 
+/* ---------------------- */
+/* Test 28: pdict_create() */
+/* ---------------------- */
+int test_pdict_create(void)
+{	
+	/* Create and destroy the same list several times */
+	/* Index 0 */
+	pdict_t *dict = pdict_create(0);
+	ASSERT_TRUE(dict == NULL, "Expected dict == NULL at index 0.");
+	
+	/* Index 1 */
+	dict = pdict_create(1);
+	ASSERT_TRUE(dict != NULL, "Dict allocation failed at index 1.");
+	ASSERT_TRUE(dict->count == 0, "Initial dict count should be 0 at index 1.");
+	ASSERT_TRUE(dict->capacity == 1, "Initial dict capacity should be 1 at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
+	
+	pdict_destroy(dict);
+	
+	/* Index 2 */
+	dict = pdict_create(1024);
+	ASSERT_TRUE(dict != NULL, "Dict allocation failed at index 2.");
+	ASSERT_TRUE(dict->count == 0, "Initial dict count should be 0 at index 2.");
+	ASSERT_TRUE(dict->capacity == 1024, "Initial dict capacity should be 1024 at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
+
+	pdict_destroy(dict);
+	
+	/* Index 3 */
+	dict = pdict_create(9999);
+	ASSERT_TRUE(dict != NULL, "Dict allocation failed.");
+	ASSERT_TRUE(dict->count == 0, "Initial dict count should be 0 at index 3.");
+	ASSERT_TRUE(dict->capacity == 9999, "Initial dict capacity should be 9999 at index 3.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 3.");
+
+	pdict_destroy(dict);
+	
+	TEST_END();
+}
 
 /* ------------------------- */
 /* --- Test Suite Runner --- */
@@ -1564,6 +1603,7 @@ struct {
 	{"test_plist_empty_copy", test_plist_empty_copy},
 	{"test_plist_contains", test_plist_contains},
 	{"test_plist_add_pvar", test_plist_add_pvar},
+	{"test_pdict_create", test_plist_create},
 	{NULL, NULL}
 };
 
