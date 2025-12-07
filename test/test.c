@@ -1567,6 +1567,58 @@ int test_pdict_create(void)
 	TEST_END();
 }
 
+/* ----------------------- */
+/* Test 29: pdict_add_str() */
+/* ----------------------- */
+int test_pdict_add_str(void)
+{
+	pdict_t *dict = pdict_create(1);
+	
+	/* Index 0 */
+	pdict_add_str(dict, "library", "libpvars");
+	ASSERT_TRUE(dict->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(dict->capacity == 1, "Expected a capacity of 1 at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0.");
+	ASSERT_TRUE(pdict_contains(dict, "library") == true, "string not contained in dict at index 0.");
+	
+	/* Index 1 */
+	pdict_add_str(dict, "description", "test suite");
+	ASSERT_TRUE(dict->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(dict->capacity == 2, "Expected a capacity of 2 at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
+	ASSERT_TRUE(pdict_contains(dict, "description") == true, "string not contained in dict at index 1.");
+	
+	/* Index 2 */
+	pdict_add_str(dict, "also a description", "API");
+	ASSERT_TRUE(dict->count == 3, "Expected a count of 3 at index 2.");
+	ASSERT_TRUE(dict->capacity == 4, "Expected a capacity of 4 at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
+	ASSERT_TRUE(pdict_contains(dict, "also a description") == true, "string not contained in dict at index 2.");
+	
+	/* Test for a graceful fail when NULL is passed in */
+	/* Index 3 */
+	char *null_string = NULL;
+	pdict_add_str(dict, "null input", null_string);
+	ASSERT_TRUE(dict->count == 3, "Expected a count of 3 at index 3."); /* String count should remain unchanged since the last successful add */
+	ASSERT_TRUE(dict->capacity == 4, "Expected a capacity of 4 at index 3.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_STR_NULL_INPUT_VALUE, "Expected FAILURE_PDICT_ADD_STR_NULL_INPUT_VALUE at index 3.");
+	ASSERT_TRUE(pdict_contains(dict, null_string) == false, "Expected null_input not to be in dict at index 3.");
+	
+	/* Index 4 */
+	pdict_add_str(dict, null_string, "null input");
+	ASSERT_TRUE(dict->count == 3, "Expected a count of 3 at index 4."); /* String count should remain unchanged since the last successful add */
+	ASSERT_TRUE(dict->capacity == 4, "Expected a capacity of 4 at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_STR_NULL_INPUT_KEY, "Expected FAILURE_PDICT_ADD_STR_NULL_INPUT_KEY at index 4.");
+	
+	/* Index 5 */
+	pdict_t *null_dict = NULL;
+	pdict_add_str(null_dict, "what is it?", "library");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_STR_NULL_INPUT_DICT, "Expected FAILURE_PDICT_ADD_STR_NULL_INPUT_DICT at index 5.");
+
+	pdict_destroy(dict);
+	
+	TEST_END();
+}
 /* ------------------------- */
 /* --- Test Suite Runner --- */
 /* ------------------------- */
@@ -1604,6 +1656,7 @@ struct {
 	{"test_plist_contains", test_plist_contains},
 	{"test_plist_add_pvar", test_plist_add_pvar},
 	{"test_pdict_create", test_plist_create},
+	{"test_pdict_add_str", test_pdict_add_str},
 	{NULL, NULL}
 };
 
