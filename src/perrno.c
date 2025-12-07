@@ -518,6 +518,10 @@ const char *perror_message(void)
 		case FAILURE_PDICT_GET_VALUES_PLIST_ADD_PVAR_FAILED:
 			return "FAILURE: plist_add_pvar() failed in function pdict_get_values()";
 
+		/* pdict_ensure_capacity Failures */
+		case FAILURE_PDICT_ENSURE_CAPACITY_CALLOC_FAILED:
+			return "FAILURE: calloc() failed in function pdict_ensure_capacity()";
+
 		default:
 			return "Unknown error number";
 	}

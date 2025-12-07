@@ -9,6 +9,8 @@
 #include"perrno.h"
 #include"pdict_internal.h"
 
+static bool pdict_ensure_capacity(pdict_t *dict);
+
 /**
  * @brief Creates a hash value from the key and capacity given
  *
@@ -68,6 +70,53 @@ pdict_t *pdict_create(long int initial_capacity)
 
 	return new_dict;
 }
+
+/**
+ * @brief Ensures there is capacity for one more element, resizing if necessary.
+ * @param dict The dict to check
+ * @return True if capacity is available/resized successfully, false otherwise
+ */
+static bool pdict_ensure_capacity(pdict_t *dict)
+{
+	if (dict->count < dict->capacity) {
+		pvars_errno = SUCCESS;
+		return true;
+	}
+
+	size_t old_capacity = dict->capacity;
+	size_t new_capacity = dict->capacity * 2;
+
+	// Reallocate buckets array
+	pdict_entry_t **new_buckets = calloc(new_capacity, sizeof(pdict_entry_t *));
+	if (new_buckets == NULL) {
+		pvars_errno = FAILURE_PDICT_ENSURE_CAPACITY_CALLOC_FAILED;
+		return false;
+	}
+
+	for (size_t i = 0; i < old_capacity; i++) {
+		pdict_entry_t *current = dict->buckets[i];
+		pdict_entry_t *next = NULL;
+
+		while (current != NULL) {
+			next = current->next;
+
+			size_t new_index = pdict_hash(current->key, new_capacity);
+
+			current->next = new_buckets[new_index];
+			new_buckets[new_index] = current;
+
+			current = next;
+		}
+	}
+
+	free(dict->buckets);
+	dict->buckets = new_buckets;
+	dict->capacity = new_capacity;
+
+	pvars_errno = SUCCESS;
+	return true;
+}
+
 
 /**
  * @brief Deep copies a pdict_entry_t variable.
@@ -529,9 +578,9 @@ void pdict_remove(pdict_t *dict, const char *key)
 /**
  * @brief Adds a string to a pdict_t variable
  *
- * @param The address of a dict.
- * @param Char key
- * @param The value to add to the dict
+ * @param dict The address of a dict.
+ * @param key Char key
+ * @param value The value to add to the dict
  * @return void
  */
 void pdict_add_str(pdict_t *dict, const char *key, const char *value)
@@ -548,6 +597,11 @@ void pdict_add_str(pdict_t *dict, const char *key, const char *value)
 	}
 	if (value == NULL) {
 		pvars_errno = FAILURE_PDICT_ADD_STR_NULL_INPUT_VALUE;
+		return;
+	}
+
+	if (!pdict_ensure_capacity(dict)) {
+		/* pdict_ensure_capacity sets the error code */
 		return;
 	}
 

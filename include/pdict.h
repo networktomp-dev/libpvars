@@ -7,27 +7,25 @@ typedef struct pdict_t pdict_t;
 
 /* --- Public API Function Prototypes --- */
 
-/* plist_t setup and packdown*/
-pdict_t *pdict_create(long int initial_capacity);		/* Test 28 */
+/* pdict_t setup and packdown*/
+pdict_t *pdict_create(long int initial_capacity);				// Test 28
 pdict_t *pdict_copy(const pdict_t *src);
 
 /* Cleanup functions */
 void pdict_destroy(pdict_t *dict);
 void pdict_empty(pdict_t *dict);
-
 void pdict_remove(pdict_t *dict, const char *key);
 
-/* Functions that act on plist_t variables */
+/* Functions that act on pdict_t variables */
 void pdict_print(const pdict_t *dict);
 
-/* plist_t meta data accessors */
+/* pdict_t meta data accessors */
 size_t pdict_get_size(const pdict_t *dict);
 size_t pdict_get_capacity(const pdict_t *dict);
 pvar_type pdict_get_type(const pdict_t *dict, const char *key);
 
-
 /* Core Add element functions (SINGLE ITEM ONLY) */
-void pdict_add_str(pdict_t *dict, const char *key, const char *value);
+void pdict_add_str(pdict_t *dict, const char *key, const char *value);		// Test 29
 void pdict_add_int(pdict_t *dict, const char *key, int value);
 void pdict_add_double(pdict_t *dict, const char *key, double value);
 void pdict_add_long(pdict_t *dict, const char *key, long value);

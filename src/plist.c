@@ -8,6 +8,8 @@
 #include"pvars_internal.h"
 #include"plist_internal.h"
 
+static bool plist_ensure_capacity(plist_t *list);
+
 /**
  * @brief Creates and initializes a new plist_t structure.
  *
@@ -89,7 +91,7 @@ plist_t *plist_copy(const plist_t *src)
 
 /**
  * @brief Ensures there is capacity for one more element, resizing if necessary.
- * * @param list The list to check.
+ * @param list The list to check.
  * @return True if capacity is available/resized successfully, false otherwise.
  */
 static bool plist_ensure_capacity(plist_t *list)
