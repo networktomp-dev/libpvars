@@ -1589,25 +1589,35 @@ int test_pdict_add_str(void)
 	ASSERT_TRUE(pdict_contains(dict, "description") == true, "string not contained in dict at index 1.");
 	
 	/* Index 2 */
-	pdict_add_str(dict, "also a description", "API");
-	ASSERT_TRUE(dict->count == 3, "Expected a count of 3 at index 2.");
-	ASSERT_TRUE(dict->capacity == 4, "Expected a capacity of 4 at index 2.");
+	pdict_add_str(dict, "3", "4");
+	pdict_add_str(dict, "4", "4");
+	pdict_add_str(dict, "5", "8");
+	pdict_add_str(dict, "6", "8");
+	pdict_add_str(dict, "7", "8");
+	pdict_add_str(dict, "8", "8");
+	pdict_add_str(dict, "9", "16");
+	pdict_add_str(dict, "10", "16");
+	pdict_add_str(dict, "11", "16");
+	pdict_add_str(dict, "12", "16");
+	
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 12 at index 2.");
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 16 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
-	ASSERT_TRUE(pdict_contains(dict, "also a description") == true, "string not contained in dict at index 2.");
+	ASSERT_TRUE(pdict_contains(dict, "12") == true, "string not contained in dict at index 2.");
 	
 	/* Test for a graceful fail when NULL is passed in */
 	/* Index 3 */
 	char *null_string = NULL;
 	pdict_add_str(dict, "null input", null_string);
-	ASSERT_TRUE(dict->count == 3, "Expected a count of 3 at index 3."); /* String count should remain unchanged since the last successful add */
-	ASSERT_TRUE(dict->capacity == 4, "Expected a capacity of 4 at index 3.");
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 3 at index 3."); /* String count should remain unchanged since the last successful add */
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 4 at index 3.");
 	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_STR_NULL_INPUT_VALUE, "Expected FAILURE_PDICT_ADD_STR_NULL_INPUT_VALUE at index 3.");
 	ASSERT_TRUE(pdict_contains(dict, null_string) == false, "Expected null_input not to be in dict at index 3.");
 	
 	/* Index 4 */
 	pdict_add_str(dict, null_string, "null input");
-	ASSERT_TRUE(dict->count == 3, "Expected a count of 3 at index 4."); /* String count should remain unchanged since the last successful add */
-	ASSERT_TRUE(dict->capacity == 4, "Expected a capacity of 4 at index 4.");
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 3 at index 4."); /* String count should remain unchanged since the last successful add */
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 4 at index 4.");
 	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_STR_NULL_INPUT_KEY, "Expected FAILURE_PDICT_ADD_STR_NULL_INPUT_KEY at index 4.");
 	
 	/* Index 5 */
