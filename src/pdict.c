@@ -672,6 +672,11 @@ void pdict_add_int(pdict_t *dict, const char *key, int value)
 		return;
 	}
 
+	if (!pdict_ensure_capacity(dict)) {
+		/* pdict_ensure_capacity sets the error code */
+		return;
+	}
+
 	size_t bucket_index = pdict_hash(key, dict->capacity);
 	pdict_entry_t *current = dict->buckets[bucket_index];
 
@@ -725,6 +730,11 @@ void pdict_add_double(pdict_t *dict, const char *key, double value)
 	}
 	if (key == NULL) {
 		pvars_errno = FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_KEY;
+		return;
+	}
+
+	if (!pdict_ensure_capacity(dict)) {
+		/* pdict_ensure_capacity sets the error code */
 		return;
 	}
 
@@ -784,6 +794,11 @@ void pdict_add_long(pdict_t *dict, const char *key, long value)
 		return;
 	}
 
+	if (!pdict_ensure_capacity(dict)) {
+		/* pdict_ensure_capacity sets the error code */
+		return;
+	}
+
 	size_t bucket_index = pdict_hash(key, dict->capacity);
 	pdict_entry_t *current = dict->buckets[bucket_index];
 
@@ -837,6 +852,11 @@ void pdict_add_float(pdict_t *dict, const char *key, float value)
 	}
 	if (key == NULL) {
 		pvars_errno = FAILURE_PDICT_ADD_FLOAT_NULL_INPUT_KEY;
+		return;
+	}
+
+	if (!pdict_ensure_capacity(dict)) {
+		/* pdict_ensure_capacity sets the error code */
 		return;
 	}
 
@@ -900,6 +920,11 @@ void pdict_add_list(pdict_t *dict, const char *key, const plist_t *value)
 	}
 	if (value == NULL) {
 		pvars_errno = FAILURE_PDICT_ADD_LIST_NULL_INPUT_VALUE;
+		return;
+	}
+
+	if (!pdict_ensure_capacity(dict)) {
+		/* pdict_ensure_capacity sets the error code */
 		return;
 	}
 
@@ -970,6 +995,11 @@ void pdict_add_dict(pdict_t *dict, const char *key, const pdict_t *value)
 	}
 	if (value == NULL) {
 		pvars_errno = FAILURE_PDICT_ADD_DICT_NULL_INPUT_VALUE;
+		return;
+	}
+
+	if (!pdict_ensure_capacity(dict)) {
+		/* pdict_ensure_capacity sets the error code */
 		return;
 	}
 
