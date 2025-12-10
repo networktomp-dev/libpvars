@@ -1685,6 +1685,61 @@ int test_pdict_add_int(void)
 	TEST_END();
 }
 
+/* --------------------------- */
+/* Test 31: pdict_add_double() */
+/* --------------------------- */
+int test_pdict_add_double(void)
+{
+	pdict_t *dict = pdict_create(1);
+	
+	/* Index 0 */
+	pdict_add_double(dict, "library", 32.3);
+	ASSERT_TRUE(dict->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(dict->capacity == 1, "Expected a capacity of 1 at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0.");
+	ASSERT_TRUE(pdict_contains(dict, "library") == true, "string not contained in dict at index 0.");
+	
+	/* Index 1 */
+	pdict_add_double(dict, "description", 64.7);
+	ASSERT_TRUE(dict->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(dict->capacity == 2, "Expected a capacity of 2 at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
+	ASSERT_TRUE(pdict_contains(dict, "description") == true, "string not contained in dict at index 1.");
+	
+	/* Index 2 */
+	pdict_add_double(dict, "3", 4.0);
+	pdict_add_double(dict, "4", 4.0);
+	pdict_add_double(dict, "5", 8.0);
+	pdict_add_double(dict, "6", 8.0);
+	pdict_add_double(dict, "7", 8.0);
+	pdict_add_double(dict, "8", 8.0);
+	pdict_add_double(dict, "9", 16.0);
+	pdict_add_double(dict, "10", 16.0);
+	pdict_add_double(dict, "11", 16.0);
+	pdict_add_double(dict, "12", 16.0);
+	
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 12 at index 2.");
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 16 at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
+	ASSERT_TRUE(pdict_contains(dict, "12") == true, "string not contained in dict at index 2.");
+	
+	/* Index 3 */
+	char *null_string = NULL;
+	pdict_add_double(dict, null_string, 1234.6);
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 3 at index 3."); /* String count should remain unchanged since the last successful add */
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 4 at index 3.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_KEY, "Expected FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_KEY at index 3.");
+	
+	/* Index 4 */
+	pdict_t *null_dict = NULL;
+	pdict_add_double(null_dict, "what is it?", 2345);
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_DICT, "Expected FAILURE_PDICT_ADD_DOUBLE_NULL_INPUT_DICT at index 4.");
+
+	pdict_destroy(dict);
+	
+	TEST_END();
+}
+
 /* ------------------------- */
 /* --- Test Suite Runner --- */
 /* ------------------------- */
@@ -1724,6 +1779,7 @@ struct {
 	{"test_pdict_create", test_plist_create},
 	{"test_pdict_add_str", test_pdict_add_str},
 	{"test_pdict_add_int", test_pdict_add_int},
+	{"test_pdict_add_double", test_pdict_add_double},
 	{NULL, NULL}
 };
 
