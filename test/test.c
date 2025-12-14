@@ -1931,7 +1931,6 @@ int test_pdict_add_list(void)
 	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_LIST_NULL_INPUT_VALUE, "Expected FAILURE_PDICT_ADD_LIST_NULL_INPUT_VALUE at index 5.");
 
 	plist_destroy(list_one);
-	plist_destroy(list_one);
 	plist_destroy(list_two);
 	plist_destroy(list_three);
 	pdict_destroy(dict);
