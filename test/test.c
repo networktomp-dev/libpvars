@@ -74,6 +74,7 @@ int test_plist_add_str(void)
 	/* Index 0 */
 	plist_add_str(list, "libpvars");
 	ASSERT_TRUE(list->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(list->elements[0].type == PVAR_TYPE_STRING, "Expected type of PVAR_TYPE_STRING at index 0.");
 	ASSERT_TRUE(list->capacity == 1, "Expected a capacity of 1 at index 0.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0.");
 	ASSERT_TRUE(strcmp(list->elements[0].data.s, "libpvars") == 0, "strings are not equal at index 0.");
@@ -81,6 +82,7 @@ int test_plist_add_str(void)
 	/* Index 1 */
 	plist_add_str(list, "test suite");
 	ASSERT_TRUE(list->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(list->elements[1].type == PVAR_TYPE_STRING, "Expected type of PVAR_TYPE_STRING at index 1.");
 	ASSERT_TRUE(list->capacity == 2, "Expected a capacity of 2 at index 1.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
 	ASSERT_TRUE(strcmp(list->elements[1].data.s, "test suite") == 0, "strings are not equal at index 1.");
@@ -88,6 +90,7 @@ int test_plist_add_str(void)
 	/* Index 2 */
 	plist_add_str(list, "API");
 	ASSERT_TRUE(list->count == 3, "Expected a count of 3 at index 2.");
+	ASSERT_TRUE(list->elements[2].type == PVAR_TYPE_STRING, "Expected type of PVAR_TYPE_STRING at index 2.");
 	ASSERT_TRUE(list->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
 	ASSERT_TRUE(strcmp(list->elements[2].data.s, "API") == 0, "strings are not equal at index 2.");
@@ -120,6 +123,7 @@ int test_plist_add_int(void)
 	/* Index 0 */
 	plist_add_int(list, 0);
 	ASSERT_TRUE(list->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(list->elements[0].type == PVAR_TYPE_INT, "Expected type of PVAR_TYPE_INT at index 0.");
 	ASSERT_TRUE(list->capacity == 1, "Expected a capacity of 1 at index 0.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0");
 	ASSERT_TRUE(list->elements[0].data.i == 0, "expected int to equal 0");
@@ -127,6 +131,7 @@ int test_plist_add_int(void)
 	/* Index 1 */
 	plist_add_int(list, 1024);
 	ASSERT_TRUE(list->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(list->elements[1].type == PVAR_TYPE_INT, "Expected type of PVAR_TYPE_INT at index 1.");
 	ASSERT_TRUE(list->capacity == 2, "Expected a capacity of 2 at index 1.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1");
 	ASSERT_TRUE(list->elements[1].data.i == 1024, "expected int to equal 1024");
@@ -134,6 +139,7 @@ int test_plist_add_int(void)
 	/* Index 2 */
 	plist_add_int(list, -9999);
 	ASSERT_TRUE(list->count == 3, "Expected a count of 3 at index 2.");
+	ASSERT_TRUE(list->elements[2].type == PVAR_TYPE_INT, "Expected type of PVAR_TYPE_INT at index 2.");
 	ASSERT_TRUE(list->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2");
 	ASSERT_TRUE(list->elements[2].data.i == -9999, "expected int to equal -9999");
@@ -158,6 +164,7 @@ int test_plist_add_long(void)
 	/* Index 0 */
 	plist_add_long(list, 0);
 	ASSERT_TRUE(list->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(list->elements[0].type == PVAR_TYPE_LONG, "Expected type of PVAR_TYPE_LONG at index 0.");
 	ASSERT_TRUE(list->capacity == 1, "Expected a capacity of 1 at index 0.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0");
 	ASSERT_TRUE(list->elements[0].data.l == 0, "expected long to equal 0");
@@ -165,6 +172,7 @@ int test_plist_add_long(void)
 	/* Index 1 */
 	plist_add_long(list, 1024);
 	ASSERT_TRUE(list->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(list->elements[1].type == PVAR_TYPE_LONG, "Expected type of PVAR_TYPE_LONG at index 1.");
 	ASSERT_TRUE(list->capacity == 2, "Expected a capacity of 2 at index 1.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1");
 	ASSERT_TRUE(list->elements[1].data.l == 1024, "expected long to equal 1024");
@@ -172,6 +180,7 @@ int test_plist_add_long(void)
 	/* Index 2 */
 	plist_add_long(list, -9999);
 	ASSERT_TRUE(list->count == 3, "Expected a count of 3 at index 2.");
+	ASSERT_TRUE(list->elements[2].type == PVAR_TYPE_LONG, "Expected type of PVAR_TYPE_LONG at index 2.");
 	ASSERT_TRUE(list->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2");
 	ASSERT_TRUE(list->elements[2].data.l == -9999, "expected long to equal -9999");
@@ -196,6 +205,7 @@ int test_plist_add_double(void)
 	/* Index 0 */
 	plist_add_double(list, 0.2);
 	ASSERT_TRUE(list->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(list->elements[0].type == PVAR_TYPE_DOUBLE, "Expected type of PVAR_TYPE_DOUBLE at index 0.");
 	ASSERT_TRUE(list->capacity == 1, "Expected a capacity of 1 at index 0.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0");
 	ASSERT_TRUE(fabs(list->elements[0].data.d - 0.2) < (DBL_EPSILON * fmax(fabs(list->elements[0].data.d), fabs(0.2))), "expected double to equal 0.2");
@@ -203,6 +213,7 @@ int test_plist_add_double(void)
 	/* Index 1 */
 	plist_add_double(list, 1024.4);
 	ASSERT_TRUE(list->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(list->elements[1].type == PVAR_TYPE_DOUBLE, "Expected type of PVAR_TYPE_DOUBLE at index 1.");
 	ASSERT_TRUE(list->capacity == 2, "Expected a capacity of 2 at index 1.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1");
 	ASSERT_TRUE(fabs(list->elements[1].data.d - 1024.4) < (DBL_EPSILON * fmax(fabs(list->elements[1].data.d), fabs(1024.4))), "expected double to equal 1024.4");
@@ -210,6 +221,7 @@ int test_plist_add_double(void)
 	/* Index 2 */
 	plist_add_double(list, -9999.3);
 	ASSERT_TRUE(list->count == 3, "Expected a count of 3 at index 2.");
+	ASSERT_TRUE(list->elements[2].type == PVAR_TYPE_DOUBLE, "Expected type of PVAR_TYPE_DOUBLE at index 2.");
 	ASSERT_TRUE(list->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2");
 	ASSERT_TRUE(fabs(list->elements[2].data.d - (-9999.3)) < (DBL_EPSILON * fmax(fabs(list->elements[2].data.d), fabs(-9999.3))), "expected double to equal -9999.3");
@@ -234,6 +246,7 @@ int test_plist_add_float(void)
 	/* Index 0 */
 	plist_add_float(list, 0.2);
 	ASSERT_TRUE(list->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(list->elements[0].type == PVAR_TYPE_FLOAT, "Expected type of PVAR_TYPE_FLOAT at index 0.");
 	ASSERT_TRUE(list->capacity == 1, "Expected a capacity of 1 at index 0.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0");
 	ASSERT_TRUE(fabsf(list->elements[0].data.f - 0.2f) < FLT_EPSILON, "expected float to equal 0.2");
@@ -241,6 +254,7 @@ int test_plist_add_float(void)
 	/* Index 1 */
 	plist_add_float(list, 1024.4);
 	ASSERT_TRUE(list->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(list->elements[1].type == PVAR_TYPE_FLOAT, "Expected type of PVAR_TYPE_FLOAT at index 1.");
 	ASSERT_TRUE(list->capacity == 2, "Expected a capacity of 2 at index 1.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1");
 	ASSERT_TRUE(fabsf(list->elements[1].data.f - 1024.4f) < FLT_EPSILON, "expected float to equal 1024.4");
@@ -248,6 +262,7 @@ int test_plist_add_float(void)
 	/* Index 2 */
 	plist_add_float(list, -9999.3);
 	ASSERT_TRUE(list->count == 3, "Expected a count of 3 at index 2.");
+	ASSERT_TRUE(list->elements[2].type == PVAR_TYPE_FLOAT, "Expected type of PVAR_TYPE_FLOAT at index 2.");
 	ASSERT_TRUE(list->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2");
 	ASSERT_TRUE(fabsf(list->elements[2].data.f - (-9999.3f)) < FLT_EPSILON, "expected float to equal -9999.3");
@@ -293,18 +308,21 @@ int test_plist_add_list(void)
 	/* Index 0 */
 	plist_add_list(list_main, list_child1);
 	ASSERT_TRUE(list_main->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(list_main->elements[0].type == PVAR_TYPE_LIST, "Expected type of PVAR_TYPE_LIST at index 0.");
 	ASSERT_TRUE(list_main->capacity == 1, "Expected a capacity of 1 at index 0.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0.");
 	
 	/* Index 1 */
 	plist_add_list(list_main, list_child2);
 	ASSERT_TRUE(list_main->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(list_main->elements[1].type == PVAR_TYPE_LIST, "Expected type of PVAR_TYPE_LIST at index 1.");
 	ASSERT_TRUE(list_main->capacity == 2, "Expected a capacity of 2 at index 1.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
 	
 	/* Index 2 */
 	plist_add_list(list_main, list_child3);
 	ASSERT_TRUE(list_main->count == 3, "Expected a count of 3 at index 2.");
+	ASSERT_TRUE(list_main->elements[2].type == PVAR_TYPE_LIST, "Expected type of PVAR_TYPE_LIST at index 2.");
 	ASSERT_TRUE(list_main->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
 	
@@ -339,18 +357,21 @@ int test_plist_add_dict(void)
 	/* Index 0 */
 	plist_add_dict(list, dict1);
 	ASSERT_TRUE(list->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(list->elements[0].type == PVAR_TYPE_DICT, "Expected type of PVAR_TYPE_DICT at index 0.");
 	ASSERT_TRUE(list->capacity == 1, "Expected a capacity of 1 at index 0.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0.");
 	
 	/* Index 1 */
 	plist_add_dict(list, dict2);
 	ASSERT_TRUE(list->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(list->elements[1].type == PVAR_TYPE_DICT, "Expected type of PVAR_TYPE_DICT at index 1.");
 	ASSERT_TRUE(list->capacity == 2, "Expected a capacity of 2 at index 1.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
 	
 	/* Index 2 */
 	plist_add_dict(list, dict3);
 	ASSERT_TRUE(list->count == 3, "Expected a count of 3 at index 2.");
+	ASSERT_TRUE(list->elements[2].type == PVAR_TYPE_DICT, "Expected type of PVAR_TYPE_DICT at index 2.");
 	ASSERT_TRUE(list->capacity == 4, "Expected a capacity of 4 at index 2.");
 	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
 	
@@ -1851,6 +1872,141 @@ int test_pdict_add_float(void)
 }
 
 /* ------------------------- */
+/* ------------------------- */
+/* Test 34: pdict_add_list() */
+/* ------------------------- */
+int test_pdict_add_list(void)
+{
+	pdict_t *dict = pdict_create(1);
+	plist_t *list_one = plist_create(1);
+	plist_t *list_two = plist_create(1);
+	plist_t *list_three = plist_create(1);
+	
+	/* Index 0 */
+	pdict_add_list(dict, "library", list_one);
+	ASSERT_TRUE(dict->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(dict->capacity == 1, "Expected a capacity of 1 at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0.");
+	ASSERT_TRUE(pdict_contains(dict, "library") == true, "string not contained in dict at index 0.");
+	
+	/* Index 1 */
+	pdict_add_list(dict, "description", list_two);
+	ASSERT_TRUE(dict->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(dict->capacity == 2, "Expected a capacity of 2 at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
+	ASSERT_TRUE(pdict_contains(dict, "description") == true, "string not contained in dict at index 1.");
+	
+	/* Index 2 */
+	pdict_add_list(dict, "3", list_three);
+	pdict_add_list(dict, "4", list_one);
+	pdict_add_list(dict, "5", list_two);
+	pdict_add_list(dict, "6", list_three);
+	pdict_add_list(dict, "7", list_one);
+	pdict_add_list(dict, "8", list_two);
+	pdict_add_list(dict, "9", list_three);
+	pdict_add_list(dict, "10", list_one);
+	pdict_add_list(dict, "11", list_two);
+	pdict_add_list(dict, "12", list_three);
+	
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 12 at index 2.");
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 16 at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
+	ASSERT_TRUE(pdict_contains(dict, "12") == true, "string not contained in dict at index 2.");
+	
+	/* Index 3 */
+	char *null_string = NULL;
+	pdict_add_list(dict, null_string, list_one);
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 3 at index 3."); /* String count should remain unchanged since the last successful add */
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 4 at index 3.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_LIST_NULL_INPUT_KEY, "Expected FAILURE_PDICT_ADD_LIST_NULL_INPUT_KEY at index 3.");
+	
+	/* Index 4 */
+	pdict_t *null_dict = NULL;
+	pdict_add_list(null_dict, "what is it?", list_two);
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_LIST_NULL_INPUT_DICT, "Expected FAILURE_PDICT_ADD_LIST_NULL_INPUT_DICT at index 4.");
+
+	/* Index 5 */
+	plist_t *null_list = NULL;
+	pdict_add_list(dict, "what is it?", null_list);
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_LIST_NULL_INPUT_VALUE, "Expected FAILURE_PDICT_ADD_LIST_NULL_INPUT_VALUE at index 5.");
+
+	plist_destroy(list_one);
+	plist_destroy(list_one);
+	plist_destroy(list_two);
+	plist_destroy(list_three);
+	pdict_destroy(dict);
+	
+	TEST_END();
+}
+
+/* ------------------------- */
+/* ------------------------- */
+/* Test 35: pdict_add_dict() */
+/* ------------------------- */
+int test_pdict_add_dict(void)
+{
+	pdict_t *dict = pdict_create(1);
+	pdict_t *dict_one = pdict_create(1);
+	pdict_t *dict_two = pdict_create(1);
+	pdict_t *dict_three = pdict_create(1);
+	
+	/* Index 0 */
+	pdict_add_dict(dict, "library", dict_one);
+	ASSERT_TRUE(dict->count == 1, "Expected a count of 1 at index 0.");
+	ASSERT_TRUE(dict->capacity == 1, "Expected a capacity of 1 at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0.");
+	ASSERT_TRUE(pdict_contains(dict, "library") == true, "string not contained in dict at index 0.");
+	
+	/* Index 1 */
+	pdict_add_dict(dict, "description", dict_two);
+	ASSERT_TRUE(dict->count == 2, "Expected a count of 2 at index 1.");
+	ASSERT_TRUE(dict->capacity == 2, "Expected a capacity of 2 at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
+	ASSERT_TRUE(pdict_contains(dict, "description") == true, "string not contained in dict at index 1.");
+	
+	/* Index 2 */
+	pdict_add_dict(dict, "3", dict_three);
+	pdict_add_dict(dict, "4", dict_one);
+	pdict_add_dict(dict, "5", dict_two);
+	pdict_add_dict(dict, "6", dict_three);
+	pdict_add_dict(dict, "7", dict_one);
+	pdict_add_dict(dict, "8", dict_two);
+	pdict_add_dict(dict, "9", dict_three);
+	pdict_add_dict(dict, "10", dict_one);
+	pdict_add_dict(dict, "11", dict_two);
+	pdict_add_dict(dict, "12", dict_three);
+	
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 12 at index 2.");
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 16 at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
+	ASSERT_TRUE(pdict_contains(dict, "12") == true, "string not contained in dict at index 2.");
+	
+	/* Index 3 */
+	char *null_string = NULL;
+	pdict_add_dict(dict, null_string, dict_one);
+	ASSERT_TRUE(dict->count == 12, "Expected a count of 3 at index 3."); /* String count should remain unchanged since the last successful add */
+	ASSERT_TRUE(dict->capacity == 16, "Expected a capacity of 4 at index 3.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_DICT_NULL_INPUT_KEY, "Expected FAILURE_PDICT_ADD_DICT_NULL_INPUT_KEY at index 3.");
+	
+	/* Index 4 */
+	pdict_t *null_dict = NULL;
+	pdict_add_dict(null_dict, "what is it?", dict_two);
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_DICT_NULL_INPUT_DICT, "Expected FAILURE_PDICT_ADD_DICT_NULL_INPUT_DICT at index 4.");
+
+	/* Index 5 */
+	pdict_add_dict(dict, "what is it?", null_dict);
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_ADD_DICT_NULL_INPUT_VALUE, "Expected FAILURE_PDICT_ADD_DICT_NULL_INPUT_VALUE at index 5.");
+
+	pdict_destroy(dict_one);
+	pdict_destroy(dict_two);
+	pdict_destroy(dict_three);
+	pdict_destroy(dict);
+	
+	TEST_END();
+}
+
+/* ------------------------- */
+/* ------------------------- */
 /* --- Test Suite Runner --- */
 /* ------------------------- */
 
@@ -1892,6 +2048,8 @@ struct {
 	{"test_pdict_add_double", test_pdict_add_double},
 	{"test_pdict_add_long", test_pdict_add_long},
 	{"test_pdict_add_float", test_pdict_add_float},
+	{"test_pdict_add_list", test_pdict_add_list},
+	{"test_pdict_add_dict", test_pdict_add_dict},
 	{NULL, NULL}
 };
 
