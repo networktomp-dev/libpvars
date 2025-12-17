@@ -1939,7 +1939,6 @@ int test_pdict_add_list(void)
 }
 
 /* ------------------------- */
-/* ------------------------- */
 /* Test 35: pdict_add_dict() */
 /* ------------------------- */
 int test_pdict_add_dict(void)
@@ -2005,6 +2004,72 @@ int test_pdict_add_dict(void)
 }
 
 /* ------------------------- */
+/* Test 36: pdict_get_str() */
+/* ------------------------- */
+int test_pdict_get_str(void)
+{
+	pdict_t *dict = pdict_create(1);
+
+	pdict_add_str(dict, "library", "Memory");
+	pdict_add_str(dict, "test suite", "HD");
+	pdict_add_str(dict, "API", "RAM");
+	pdict_add_int(dict, "package", 12);
+
+	bool result = NULL;
+	char *out_value;
+
+	/* Index 0 */
+	result = pdict_get_str(dict, "library", &out_value);
+	ASSERT_TRUE(result == true, "Expected result to equal true at index 0.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 0.");
+	ASSERT_TRUE(strcmp(out_value, "Memory") == 0, "Expected value to match string at index 0.");
+	free(out_value);
+	
+	/* Index 1 */
+	result = pdict_get_str(dict, "test suite", &out_value);
+	ASSERT_TRUE(result == true, "Expected result to equal true at index 1.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 1.");
+	ASSERT_TRUE(strcmp(out_value, "HD") == 0, "Expected value to match string at index 1.");
+	free(out_value);
+	
+	/* Index 2 */
+	result = pdict_get_str(dict, "API", &out_value);
+	ASSERT_TRUE(result == true, "Expected result to equal true at index 2.");
+	ASSERT_TRUE(pvars_errno == SUCCESS, "pvars_errno expected success at index 2.");
+	ASSERT_TRUE(strcmp(out_value, "RAM") == 0, "Expected value to match string at index 2.");
+	free(out_value);
+	
+	/* Error tests */
+	/* Wrong type */
+	/* Index 3 */
+	result = pdict_get_str(dict, "package", &out_value);
+	ASSERT_TRUE(result == false, "Expected result to equal false at index 3.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_GET_STR_WRONG_TYPE, "pvars_errno expected FAILURE_PDICT_GET_STR_WRONG_TYPE at index 3.");
+
+	/* Null input */
+	/* Index 4 */
+	char **null_out_value = NULL;
+	result = pdict_get_str(dict, "library", null_out_value);
+	ASSERT_TRUE(result == false, "Expected result to equal false at index 4.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_GET_STR_NULL_INPUT_OUT_VALUE, "pvars_errno expected FAILURE_PDICT_GET_STR_NULL_INPUT_OUT_VALUE at index 4.");
+
+	/* Index 5 */
+	pdict_t *null_dict = NULL;
+	result = pdict_get_str(null_dict, "library", &out_value);
+	ASSERT_TRUE(result == false, "Expected result to equal false at index 5.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_GET_STR_NULL_INPUT_DICT, "pvars_errno expected FAILURE_PDICT_GET_STR_NULL_INPUT_DICT at index 5.");
+
+	/* Index 6 */
+	char *null_key = NULL;
+	result = pdict_get_str(dict, null_key, &out_value);
+	ASSERT_TRUE(result == false, "Expected result to equal false at index 6.");
+	ASSERT_TRUE(pvars_errno == FAILURE_PDICT_GET_STR_NULL_INPUT_KEY, "pvars_errno expected FAILURE_PDICT_GET_STR_NULL_INPUT_KEY at index 6.");
+
+	pdict_destroy(dict);
+	
+	TEST_END();
+}
+
 /* ------------------------- */
 /* --- Test Suite Runner --- */
 /* ------------------------- */
@@ -2049,6 +2114,7 @@ struct {
 	{"test_pdict_add_float", test_pdict_add_float},
 	{"test_pdict_add_list", test_pdict_add_list},
 	{"test_pdict_add_dict", test_pdict_add_dict},
+	{"test_pdict_get_str", test_pdict_get_str},
 	{NULL, NULL}
 };
 
